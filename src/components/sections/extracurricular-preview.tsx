@@ -74,7 +74,12 @@ export async function ExtracurricularPreview({ activePeriodId }: Ekstrakurikuler
           </ScrollReveal>
 
           <div className="lg:col-span-7">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            <div className={`grid gap-4 md:gap-6 ${
+              ekskuls.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' :
+              ekskuls.length === 2 ? 'grid-cols-2' :
+              ekskuls.length <= 4 ? 'grid-cols-2' :
+              'grid-cols-2 md:grid-cols-3'
+            }`}>
               {ekskuls.map((ekskul, index) => (
                 <ScrollReveal 
                   key={ekskul.id} 

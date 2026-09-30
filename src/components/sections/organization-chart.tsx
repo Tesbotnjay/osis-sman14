@@ -60,7 +60,6 @@ export async function OrganizationChart({ activePeriodId }: OrgChartProps) {
   const positionMap = new Map<string, Position>();
   const rootPositions: Position[] = [];
 
-  // Initialize map
   const castedPositions = positions as any[];
   castedPositions.forEach(pos => {
     positionMap.set(pos.id, {
@@ -70,7 +69,6 @@ export async function OrganizationChart({ activePeriodId }: OrgChartProps) {
     } as Position);
   });
 
-  // Link children
   positionMap.forEach(pos => {
     if (pos.parent_position_id && positionMap.has(pos.parent_position_id)) {
       positionMap.get(pos.parent_position_id)!.children!.push(pos);
@@ -79,7 +77,6 @@ export async function OrganizationChart({ activePeriodId }: OrgChartProps) {
     }
   });
 
-  // Sort children by order_index
   const sortChildren = (pos: Position) => {
     if (pos.children && pos.children.length > 0) {
       pos.children.sort((a, b) => a.order_index - b.order_index);
@@ -89,46 +86,61 @@ export async function OrganizationChart({ activePeriodId }: OrgChartProps) {
   rootPositions.sort((a, b) => a.order_index - b.order_index);
   rootPositions.forEach(sortChildren);
 
-  // We only render up to 3 levels deep on homepage to prevent massive overflow
+  // ============ DESKTOP: True tree with connector lines ============
   const renderDesktopNode = (node: Position, level: number = 0) => {
-    if (level > 2) return null; // Limit depth for homepage
+    const hasChildren = node.children && node.children.length > 0;
 
     return (
       <div key={node.id} className="flex flex-col items-center">
-        <div className="flex flex-col items-center text-center group cursor-default relative z-10 bg-secondary/30 p-2 rounded-3xl">
-          <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-slate-300 border-4 border-white shadow-xl mb-3 overflow-hidden transition-transform duration-300 group-hover:scale-105 relative">
+        {/* Node card */}
+        <div className="flex flex-col items-center text-center group cursor-default relative z-10">
+          <div className={`rounded-full border-4 border-white shadow-xl overflow-hidden transition-transform duration-300 group-hover:scale-105 relative ${
+            level === 0 ? 'w-28 h-28 md:w-32 md:h-32' : level === 1 ? 'w-22 h-22 md:w-24 md:h-24' : 'w-16 h-16 md:w-20 md:h-20'
+          }`}>
             {node.member?.photo_url ? (
               <Image src={node.member.photo_url} alt={node.member?.name || node.title} fill className="object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary/30 text-xs">No Photo</div>
+              <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary/30 text-xs">Foto</div>
             )}
           </div>
-          <h4 className="font-heading font-bold text-base md:text-lg text-primary leading-tight">
+          <h4 className={`font-heading font-bold text-primary leading-tight mt-2 ${
+            level === 0 ? 'text-lg md:text-xl' : level === 1 ? 'text-base' : 'text-sm'
+          }`}>
             {node.member?.name || 'Kosong'}
           </h4>
-          <p className="text-[10px] md:text-xs font-medium text-primary/70 uppercase tracking-wider mt-1 max-w-[150px]">
-            {node.title} {node.division ? ` - ${node.division}` : ''}
+          <p className="text-[10px] md:text-xs font-semibold text-primary/60 uppercase tracking-wider mt-0.5 max-w-[160px] leading-tight">
+            {node.title}
           </p>
+          {node.division && (
+            <p className="text-[9px] md:text-[10px] text-primary/40 mt-0.5 max-w-[160px]">
+              {node.division}
+            </p>
+          )}
         </div>
 
-        {node.children && node.children.length > 0 && level < 2 && (
-          <div className="flex flex-col items-center w-full mt-[-10px]">
+        {/* Children with connector lines */}
+        {hasChildren && (
+          <div className="flex flex-col items-center w-full">
             {/* Vertical line down from parent */}
-            <div className="w-px h-8 bg-primary/30 -z-10" />
+            <div className="w-0.5 h-8 bg-primary/25" />
             
-            {/* Horizontal line connecting children */}
-            {node.children.length > 1 && (
-              <div className="w-full h-px bg-primary/30 -z-10 relative" style={{ 
-                width: `calc(100% - ${100 / node.children.length}%)` 
-              }} />
+            {/* Horizontal branch line (only if more than 1 child) */}
+            {node.children!.length > 1 && (
+              <div className="relative w-full flex justify-center">
+                <div className="h-0.5 bg-primary/25" style={{
+                  width: `calc(100% - ${100 / node.children!.length}%)`
+                }} />
+              </div>
             )}
-            
-            {/* Children container */}
-            <div className="flex justify-center w-full mt-4 gap-4 md:gap-8 lg:gap-12">
-              {node.children.map(child => (
-                <div key={child.id} className="flex flex-col items-center relative">
-                  {/* Vertical line down to child (only if multiple children, otherwise parent line is enough) */}
-                  {node.children!.length > 1 && <div className="w-px h-4 bg-primary/30 absolute -top-4" />}
+
+            {/* Children nodes */}
+            <div className={`flex justify-center gap-3 md:gap-6 lg:gap-10 ${
+              node.children!.length > 1 ? '' : 'mt-0'
+            }`}>
+              {node.children!.map(child => (
+                <div key={child.id} className="flex flex-col items-center">
+                  {/* Vertical connector line to child */}
+                  <div className="w-0.5 h-6 bg-primary/25" />
                   {renderDesktopNode(child, level + 1)}
                 </div>
               ))}
@@ -139,42 +151,75 @@ export async function OrganizationChart({ activePeriodId }: OrgChartProps) {
     );
   };
 
-  const renderMobileNode = (node: Position, level: number = 0) => {
-    if (level > 2) return null;
+  // ============ MOBILE: Vertical tree with branch indicators ============
+  const renderMobileNode = (node: Position, level: number = 0, isLast: boolean = false) => {
+    const hasChildren = node.children && node.children.length > 0;
+    const indent = level * 1.25;
+
     return (
-      <div key={`mob-${node.id}`} className="flex flex-col w-full">
-        <ScrollReveal delay={level * 0.1}>
-          <div className="flex items-center gap-4 bg-white p-3 md:p-4 rounded-2xl shadow-sm relative z-10" style={{ marginLeft: `${level * 1.5}rem` }}>
-            {/* Indentation connector */}
-            {level > 0 && (
-              <div className="absolute -left-4 md:-left-6 top-1/2 w-4 md:w-6 h-px bg-primary/30" />
+      <div key={`mob-${node.id}`} className="relative">
+        {/* Vertical line from parent */}
+        {level > 0 && (
+          <>
+            {/* Horizontal branch connector */}
+            <div 
+              className="absolute top-6 h-0.5 bg-primary/20" 
+              style={{ left: `${indent - 1.25}rem`, width: '1.25rem' }} 
+            />
+            {/* Vertical line continuing down */}
+            {!isLast && (
+              <div 
+                className="absolute top-0 w-0.5 bg-primary/20" 
+                style={{ left: `${indent - 1.25}rem`, height: '100%' }} 
+              />
             )}
-            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-slate-200 shrink-0 relative overflow-hidden border-2 border-white shadow-sm">
+            {isLast && (
+              <div 
+                className="absolute top-0 w-0.5 bg-primary/20" 
+                style={{ left: `${indent - 1.25}rem`, height: '1.5rem' }} 
+              />
+            )}
+          </>
+        )}
+
+        <ScrollReveal delay={level * 0.05}>
+          <div 
+            className={`flex items-center gap-3 p-3 rounded-2xl relative z-10 transition-colors ${
+              level === 0 ? 'bg-primary/5 border border-primary/10 shadow-sm' : 'bg-white/80'
+            }`} 
+            style={{ marginLeft: `${indent}rem` }}
+          >
+            <div className={`rounded-full bg-slate-200 shrink-0 relative overflow-hidden border-2 border-white shadow-sm ${
+              level === 0 ? 'w-14 h-14' : 'w-10 h-10'
+            }`}>
               {node.member?.photo_url ? (
                 <Image src={node.member.photo_url} alt={node.member?.name || node.title} fill className="object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary/20 text-[10px]">No Photo</div>
+                <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary/20 text-[8px]">Foto</div>
               )}
             </div>
-            <div className="flex-grow">
-              <h4 className="font-heading font-bold text-primary text-sm md:text-base leading-tight">
+            <div className="flex-grow min-w-0">
+              <h4 className={`font-heading font-bold text-primary leading-tight truncate ${
+                level === 0 ? 'text-sm' : 'text-xs'
+              }`}>
                 {node.member?.name || 'Kosong'}
               </h4>
-              <p className="text-[10px] md:text-xs font-medium text-primary/60 uppercase tracking-wider mt-0.5 line-clamp-1">
-                {node.title} {node.division ? `- ${node.division}` : ''}
+              <p className="text-[10px] font-medium text-primary/50 uppercase tracking-wider mt-0.5 truncate">
+                {node.title} {node.division ? `• ${node.division}` : ''}
               </p>
             </div>
           </div>
         </ScrollReveal>
         
-        {/* Children line container */}
-        {node.children && node.children.length > 0 && level < 2 && (
-          <div className="relative">
-            {/* Vertical line passing through children indentations */}
-            <div className="absolute left-[0.75rem] md:left-[0.375rem] top-0 bottom-6 w-px bg-primary/30" style={{ marginLeft: `${level * 1.5}rem` }} />
-            <div className="flex flex-col gap-3 mt-3 relative z-10">
-              {node.children.map(child => renderMobileNode(child, level + 1))}
-            </div>
+        {/* Children */}
+        {hasChildren && (
+          <div className="flex flex-col gap-2 mt-2 relative">
+            {/* Vertical line through children */}
+            <div 
+              className="absolute top-0 w-0.5 bg-primary/20" 
+              style={{ left: `${indent}rem`, bottom: 0 }} 
+            />
+            {node.children!.map((child, i) => renderMobileNode(child, level + 1, i === node.children!.length - 1))}
           </div>
         )}
       </div>
@@ -201,17 +246,19 @@ export async function OrganizationChart({ activePeriodId }: OrgChartProps) {
         </ScrollReveal>
 
         {/* Desktop Tree Chart */}
-        <div className="hidden lg:flex w-full max-w-6xl mx-auto mb-16 justify-center overflow-x-auto pb-8">
+        <div className="hidden lg:flex w-full justify-center overflow-x-auto pb-8 mb-16">
           <div className="min-w-max px-8">
             <ScrollReveal delay={0.1}>
-              {rootPositions.map(root => renderDesktopNode(root, 0))}
+              <div className="flex flex-col items-center gap-0">
+                {rootPositions.map(root => renderDesktopNode(root, 0))}
+              </div>
             </ScrollReveal>
           </div>
         </div>
 
         {/* Mobile Vertical List */}
-        <div className="lg:hidden flex flex-col gap-3 max-w-md mx-auto mb-12 relative px-4">
-          {rootPositions.map(root => renderMobileNode(root, 0))}
+        <div className="lg:hidden flex flex-col gap-2 max-w-lg mx-auto mb-12 relative px-2">
+          {rootPositions.map((root, i) => renderMobileNode(root, 0, i === rootPositions.length - 1))}
         </div>
 
         <ScrollReveal delay={0.4} className="text-center">

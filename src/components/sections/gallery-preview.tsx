@@ -74,12 +74,25 @@ export async function GalleryPreview({ activePeriodId }: GalleryProps) {
           </ScrollReveal>
         </div>
 
-        {/* Masonry-like Grid Layout */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        {/* Auto-adjusting Gallery Grid */}
+        <div className={`grid gap-4 md:gap-6 ${
+          images.length === 1 ? 'grid-cols-1 max-w-2xl mx-auto' :
+          images.length === 2 ? 'grid-cols-2' :
+          images.length === 3 ? 'grid-cols-2 md:grid-cols-3' :
+          'grid-cols-2 md:grid-cols-4'
+        }`}>
           {images.map((img, index) => {
-            let spanClass = "col-span-1 row-span-1 aspect-square";
-            if (index === 0) spanClass = "col-span-2 row-span-2 aspect-square md:aspect-auto";
-            if (index === 3 || index === 4) spanClass = "col-span-2 md:col-span-1 row-span-1 aspect-[2/1] md:aspect-square";
+            // Dynamic span classes based on total count and position
+            let spanClass = 'aspect-square';
+            if (images.length >= 4) {
+              if (index === 0) spanClass = 'col-span-2 row-span-2 aspect-square md:aspect-auto md:min-h-[320px]';
+              else spanClass = 'aspect-square';
+            } else if (images.length === 3) {
+              if (index === 0) spanClass = 'col-span-2 md:col-span-1 aspect-[4/3]';
+              else spanClass = 'aspect-[4/3]';
+            } else if (images.length === 1) {
+              spanClass = 'aspect-[16/9] max-h-[400px]';
+            }
             
             return (
               <ScrollReveal 

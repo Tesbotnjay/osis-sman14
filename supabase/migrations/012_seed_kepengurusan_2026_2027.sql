@@ -1,22 +1,24 @@
 -- =============================================
--- SEED KEPENGURUSAN OSIS 2026/2027 (FIXED HIERARCHY)
+-- SEED KEPENGURUSAN OSIS 2026/2027
 -- =============================================
 -- Structure:
---   KETUA
---     └── WAKIL
---           ├── Sekretaris 1 & 2
---           ├── Bendahara 1 & 2
---           ├── Agama (Koor → Anggota)
---           ├── Medkom (Koor → Anggota)
---           ├── Belneg (Koor → Anggota)
---           ├── Olahraga (Koor → Anggota)
---           ├── KWH (Koor → Anggota)
---           └── TIK (Koor → Anggota)
+--   PEMBINA (Ahmad Saleh, S.Pd.)
+--     └── KETUA
+--           └── WAKIL
+--                 ├── Sekretaris 1 & 2
+--                 ├── Bendahara 1 & 2
+--                 ├── Agama (Koor → Anggota)
+--                 ├── Medkom (Koor → Anggota)
+--                 ├── Belneg (Koor → Anggota)
+--                 ├── Olahraga (Koor → Anggota)
+--                 ├── KWH (Koor → Anggota)
+--                 └── TIK (Koor → Anggota)
 
 DO $$
 DECLARE
   v_period_id uuid;
   -- Member IDs
+  m_pembina uuid := 'a0000001-0001-4000-8000-000000000000';
   m_rizky uuid := 'a0000001-0001-4000-8000-000000000001';
   m_naura_ken uuid := 'a0000001-0001-4000-8000-000000000002';
   m_febi uuid := 'a0000001-0001-4000-8000-000000000003';
@@ -66,6 +68,7 @@ DECLARE
   m_yulia uuid := 'a0000001-0001-4000-8000-000000000066';
 
   -- Position IDs
+  p_pembina uuid := 'b0000001-0001-4000-8000-000000000000';
   p_ketua uuid := 'b0000001-0001-4000-8000-000000000001';
   p_wakil uuid := 'b0000001-0001-4000-8000-000000000002';
   p_sekre1 uuid := 'b0000001-0001-4000-8000-000000000003';
@@ -93,6 +96,7 @@ BEGIN
   -- INSERT MEMBERS
   -- =============================================
   INSERT INTO public.members (id, name, description, active, order_index, period_id) VALUES
+  (m_pembina, 'Ahmad Saleh, S.Pd.', 'Pembina OSIS', true, 0, v_period_id),
   (m_rizky, 'Muhammad Rizky Andhika', 'XI-5', true, 1, v_period_id),
   (m_naura_ken, 'Naura Ken Nurul Izzah', 'X-6', true, 2, v_period_id),
   (m_febi, 'Febi Fitria Anindah', 'XI-3', true, 3, v_period_id),
@@ -139,13 +143,17 @@ BEGIN
   -- ORGANIZATION POSITIONS
   -- =============================================
 
-  -- Level 0: KETUA (root, no parent)
+  -- Level 0: PEMBINA (root, no parent)
   INSERT INTO public.organization_positions (id, title, division, parent_position_id, member_id, order_index, period_id)
-  VALUES (p_ketua, 'Ketua OSIS', 'Pengurus Inti', NULL, m_rizky, 0, v_period_id);
+  VALUES (p_pembina, 'Pembina OSIS', 'Pembina', NULL, m_pembina, 0, v_period_id);
 
-  -- Level 1: WAKIL (parent = KETUA)
+  -- Level 1: KETUA (parent = PEMBINA)
   INSERT INTO public.organization_positions (id, title, division, parent_position_id, member_id, order_index, period_id)
-  VALUES (p_wakil, 'Wakil Ketua OSIS', 'Pengurus Inti', p_ketua, m_naura_ken, 1, v_period_id);
+  VALUES (p_ketua, 'Ketua OSIS', 'Pengurus Inti', p_pembina, m_rizky, 1, v_period_id);
+
+  -- Level 2: WAKIL (parent = KETUA)
+  INSERT INTO public.organization_positions (id, title, division, parent_position_id, member_id, order_index, period_id)
+  VALUES (p_wakil, 'Wakil Ketua OSIS', 'Pengurus Inti', p_ketua, m_naura_ken, 2, v_period_id);
 
   -- Level 2: Sekretaris & Bendahara (parent = WAKIL)
   INSERT INTO public.organization_positions (id, title, division, parent_position_id, member_id, order_index, period_id) VALUES

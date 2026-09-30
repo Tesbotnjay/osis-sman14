@@ -202,6 +202,7 @@ export default function PositionPage() {
               onChange={(e) => setFormData({...formData, 'division': e.target.value})}
             >
               <option value="">Pilih Divisi...</option>
+              <option value="Pembina">Pembina</option>
               <option value="Pengurus Inti">Pengurus Inti</option>
               <option value="Agama">Agama</option>
               <option value="Media Komunikasi (Medkom)">Media Komunikasi (Medkom)</option>

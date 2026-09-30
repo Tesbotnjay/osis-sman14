@@ -1,9 +1,17 @@
 -- =============================================
--- SEED KEPENGURUSAN OSIS 2026/2027
+-- SEED KEPENGURUSAN OSIS 2026/2027 (FIXED HIERARCHY)
 -- =============================================
--- This migration adds all members and organization positions
--- for the OSIS structure period 2026/2027.
--- Uses deterministic UUIDs for idempotency.
+-- Structure:
+--   KETUA
+--     └── WAKIL
+--           ├── Sekretaris 1 & 2
+--           ├── Bendahara 1 & 2
+--           ├── Agama (Koor → Anggota)
+--           ├── Medkom (Koor → Anggota)
+--           ├── Belneg (Koor → Anggota)
+--           ├── Olahraga (Koor → Anggota)
+--           ├── KWH (Koor → Anggota)
+--           └── TIK (Koor → Anggota)
 
 DO $$
 DECLARE
@@ -64,7 +72,6 @@ DECLARE
   p_sekre2 uuid := 'b0000001-0001-4000-8000-000000000004';
   p_benda1 uuid := 'b0000001-0001-4000-8000-000000000005';
   p_benda2 uuid := 'b0000001-0001-4000-8000-000000000006';
-  -- Sekbid heads
   p_agama_head uuid := 'b0000001-0001-4000-8000-000000000010';
   p_medkom_head uuid := 'b0000001-0001-4000-8000-000000000020';
   p_belneg_head uuid := 'b0000001-0001-4000-8000-000000000030';
@@ -73,13 +80,12 @@ DECLARE
   p_tik_head uuid := 'b0000001-0001-4000-8000-000000000060';
 
 BEGIN
-  -- Get active period
   SELECT id INTO v_period_id FROM public.periods WHERE is_active = true LIMIT 1;
   IF v_period_id IS NULL THEN
-    RAISE EXCEPTION 'No active period found. Please set a period as active first.';
+    RAISE EXCEPTION 'No active period found.';
   END IF;
 
-  -- Clean existing data for this period to avoid duplicates
+  -- Clean existing data for this period
   DELETE FROM public.organization_positions WHERE period_id = v_period_id;
   DELETE FROM public.members WHERE period_id = v_period_id;
 
@@ -87,47 +93,40 @@ BEGIN
   -- INSERT MEMBERS
   -- =============================================
   INSERT INTO public.members (id, name, description, active, order_index, period_id) VALUES
-  -- Pengurus Inti
   (m_rizky, 'Muhammad Rizky Andhika', 'XI-5', true, 1, v_period_id),
   (m_naura_ken, 'Naura Ken Nurul Izzah', 'X-6', true, 2, v_period_id),
   (m_febi, 'Febi Fitria Anindah', 'XI-3', true, 3, v_period_id),
   (m_alfiora, 'Alfiora Bilqies Izzati Sharomah', 'XI-1', true, 4, v_period_id),
   (m_tristan, 'Tristan Elvis Pratama Putra', 'XI-5', true, 5, v_period_id),
   (m_adalicia, 'Adalicia Allese Lisulembang', 'X-6', true, 6, v_period_id),
-  -- Agama
   (m_fahrurrozi, 'Muhammad Fahrurrozi', 'XI-5', true, 10, v_period_id),
   (m_khalishah, 'Khalishah Mahirah', 'X-4', true, 11, v_period_id),
   (m_yesikha, 'Yesikha Charolin Makigawe', 'X-6', true, 12, v_period_id),
   (m_queenzania, 'Queenzania Ramadhani Ilyas', 'X-2', true, 13, v_period_id),
   (m_assifa, 'Assifa Rahma', 'X-6', true, 14, v_period_id),
-  -- Medkom
   (m_avinda, 'Avinda Aulia Khafid', 'XI-5', true, 20, v_period_id),
   (m_annisa_f, 'Annisa Fauzie', 'X-5', true, 21, v_period_id),
   (m_bilqies_m, 'Bilqies Muna Hadi Putri', 'X-1', true, 22, v_period_id),
   (m_jelita, 'Jelita Regina Saputri', 'X-2', true, 23, v_period_id),
   (m_naura_suci, 'Naura Suci', '-', true, 24, v_period_id),
-  -- Belneg
   (m_maulana, 'Muhammad Maulana', 'XI-1', true, 30, v_period_id),
   (m_rizky_f, 'Muhammad Rizky Faizal Ahkdan', 'X-2', true, 31, v_period_id),
   (m_lintang, 'Lintang Abimanyu', 'X-4', true, 32, v_period_id),
   (m_amanda_c, 'Amanda Chantika Ramadhanie', 'X-4', true, 33, v_period_id),
   (m_riby, 'Riby Rafifa Elvari Putri', 'X-4', true, 34, v_period_id),
   (m_anisa_h, 'Anisa Hana Dzakira', 'X-3', true, 35, v_period_id),
-  -- Olahraga
   (m_kalila, 'Kalila Najmil Al Humaira', 'XI-5', true, 40, v_period_id),
   (m_aisyah, 'Aisyah Ariyani', 'X-5', true, 41, v_period_id),
   (m_amanda_t, 'Amanda Triandita Putri', 'X-5', true, 42, v_period_id),
   (m_rafif, 'Rafif Zaky Andra Pratama', 'X-6', true, 43, v_period_id),
   (m_naila, 'Naila Zaviera Ade Putri', 'X-1', true, 44, v_period_id),
   (m_waode, 'Wa Ode Aprilia Izzati A.D', 'X-1', true, 45, v_period_id),
-  -- KWH
   (m_febiangi, 'Febiangi Siti Nurhalisa', 'XI-5', true, 50, v_period_id),
   (m_raysha, 'Raysha Putri Syah', 'X-5', true, 51, v_period_id),
   (m_najya, 'Najya Sadira', 'XI-2', true, 52, v_period_id),
   (m_adisty, 'Adisty Nurani', 'X-6', true, 53, v_period_id),
   (m_thady, 'Thady Syahdan Syakur', 'X-6', true, 54, v_period_id),
   (m_mazda, 'Mazda', 'X-1', true, 55, v_period_id),
-  -- TIK
   (m_jenie, 'Jenie Gunawan', 'XI-5', true, 60, v_period_id),
   (m_lones, 'Lones Liola', 'X-5', true, 61, v_period_id),
   (m_chelsea, 'Chelsea Kornika', 'X-2', true, 62, v_period_id),
@@ -137,45 +136,50 @@ BEGIN
   (m_yulia, 'Yulia Putri', 'X-5', true, 66, v_period_id);
 
   -- =============================================
-  -- INSERT ORGANIZATION POSITIONS (Tree Structure)
+  -- ORGANIZATION POSITIONS
   -- =============================================
 
-  -- Level 0: KETUA
+  -- Level 0: KETUA (root, no parent)
   INSERT INTO public.organization_positions (id, title, division, parent_position_id, member_id, order_index, period_id)
-  VALUES (p_ketua, 'Ketua OSIS', 'Pengurus Inti', NULL, m_rizky, 1, v_period_id);
+  VALUES (p_ketua, 'Ketua OSIS', 'Pengurus Inti', NULL, m_rizky, 0, v_period_id);
 
-  -- Level 1: WAKIL, SEKRETARIS, BENDAHARA (parent = KETUA)
+  -- Level 1: WAKIL (parent = KETUA)
+  INSERT INTO public.organization_positions (id, title, division, parent_position_id, member_id, order_index, period_id)
+  VALUES (p_wakil, 'Wakil Ketua OSIS', 'Pengurus Inti', p_ketua, m_naura_ken, 1, v_period_id);
+
+  -- Level 2: Sekretaris & Bendahara (parent = WAKIL)
   INSERT INTO public.organization_positions (id, title, division, parent_position_id, member_id, order_index, period_id) VALUES
-  (p_wakil, 'Wakil Ketua OSIS', 'Pengurus Inti', p_ketua, m_naura_ken, 2, v_period_id),
-  (p_sekre1, 'Sekretaris 1', 'Pengurus Inti', p_ketua, m_febi, 3, v_period_id),
-  (p_sekre2, 'Sekretaris 2', 'Pengurus Inti', p_ketua, m_alfiora, 4, v_period_id),
-  (p_benda1, 'Bendahara 1', 'Pengurus Inti', p_ketua, m_tristan, 5, v_period_id),
-  (p_benda2, 'Bendahara 2', 'Pengurus Inti', p_ketua, m_adalicia, 6, v_period_id);
+  (p_sekre1, 'Sekretaris 1', 'Pengurus Inti', p_wakil, m_febi, 2, v_period_id),
+  (p_sekre2, 'Sekretaris 2', 'Pengurus Inti', p_wakil, m_alfiora, 3, v_period_id),
+  (p_benda1, 'Bendahara 1', 'Pengurus Inti', p_wakil, m_tristan, 4, v_period_id),
+  (p_benda2, 'Bendahara 2', 'Pengurus Inti', p_wakil, m_adalicia, 5, v_period_id);
 
-  -- Level 1: SEKSI BIDANG HEADS (parent = KETUA)
+  -- Level 2: Seksi Bidang Koordinator (parent = WAKIL)
   INSERT INTO public.organization_positions (id, title, division, parent_position_id, member_id, order_index, period_id) VALUES
-  (p_agama_head, 'Koordinator', 'Agama', p_ketua, m_fahrurrozi, 10, v_period_id),
-  (p_medkom_head, 'Koordinator', 'Media Komunikasi (Medkom)', p_ketua, m_avinda, 20, v_period_id),
-  (p_belneg_head, 'Koordinator', 'Bela Negara (Belneg)', p_ketua, m_maulana, 30, v_period_id),
-  (p_olahraga_head, 'Koordinator', 'Olah Raga', p_ketua, m_kalila, 40, v_period_id),
-  (p_kwh_head, 'Koordinator', 'Kewirausahaan (KWH)', p_ketua, m_febiangi, 50, v_period_id),
-  (p_tik_head, 'Koordinator', 'TIK', p_ketua, m_jenie, 60, v_period_id);
+  (p_agama_head, 'Koordinator', 'Agama', p_wakil, m_fahrurrozi, 10, v_period_id),
+  (p_medkom_head, 'Koordinator', 'Media Komunikasi (Medkom)', p_wakil, m_avinda, 20, v_period_id),
+  (p_belneg_head, 'Koordinator', 'Bela Negara (Belneg)', p_wakil, m_maulana, 30, v_period_id),
+  (p_olahraga_head, 'Koordinator', 'Olah Raga', p_wakil, m_kalila, 40, v_period_id),
+  (p_kwh_head, 'Koordinator', 'Kewirausahaan (KWH)', p_wakil, m_febiangi, 50, v_period_id),
+  (p_tik_head, 'Koordinator', 'TIK', p_wakil, m_jenie, 60, v_period_id);
 
-  -- Level 2: AGAMA Members (parent = agama_head)
+  -- Level 3: Anggota per Divisi
+
+  -- AGAMA
   INSERT INTO public.organization_positions (title, division, parent_position_id, member_id, order_index, period_id) VALUES
   ('Anggota', 'Agama', p_agama_head, m_khalishah, 11, v_period_id),
   ('Anggota', 'Agama', p_agama_head, m_yesikha, 12, v_period_id),
   ('Anggota', 'Agama', p_agama_head, m_queenzania, 13, v_period_id),
   ('Anggota', 'Agama', p_agama_head, m_assifa, 14, v_period_id);
 
-  -- Level 2: MEDKOM Members (parent = medkom_head)
+  -- MEDKOM
   INSERT INTO public.organization_positions (title, division, parent_position_id, member_id, order_index, period_id) VALUES
   ('Anggota', 'Media Komunikasi (Medkom)', p_medkom_head, m_annisa_f, 21, v_period_id),
   ('Anggota', 'Media Komunikasi (Medkom)', p_medkom_head, m_bilqies_m, 22, v_period_id),
   ('Anggota', 'Media Komunikasi (Medkom)', p_medkom_head, m_jelita, 23, v_period_id),
   ('Anggota', 'Media Komunikasi (Medkom)', p_medkom_head, m_naura_suci, 24, v_period_id);
 
-  -- Level 2: BELNEG Members (parent = belneg_head)
+  -- BELNEG
   INSERT INTO public.organization_positions (title, division, parent_position_id, member_id, order_index, period_id) VALUES
   ('Anggota', 'Bela Negara (Belneg)', p_belneg_head, m_rizky_f, 31, v_period_id),
   ('Anggota', 'Bela Negara (Belneg)', p_belneg_head, m_lintang, 32, v_period_id),
@@ -183,7 +187,7 @@ BEGIN
   ('Anggota', 'Bela Negara (Belneg)', p_belneg_head, m_riby, 34, v_period_id),
   ('Anggota', 'Bela Negara (Belneg)', p_belneg_head, m_anisa_h, 35, v_period_id);
 
-  -- Level 2: OLAHRAGA Members (parent = olahraga_head)
+  -- OLAHRAGA
   INSERT INTO public.organization_positions (title, division, parent_position_id, member_id, order_index, period_id) VALUES
   ('Anggota', 'Olah Raga', p_olahraga_head, m_aisyah, 41, v_period_id),
   ('Anggota', 'Olah Raga', p_olahraga_head, m_amanda_t, 42, v_period_id),
@@ -191,7 +195,7 @@ BEGIN
   ('Anggota', 'Olah Raga', p_olahraga_head, m_naila, 44, v_period_id),
   ('Anggota', 'Olah Raga', p_olahraga_head, m_waode, 45, v_period_id);
 
-  -- Level 2: KWH Members (parent = kwh_head)
+  -- KWH
   INSERT INTO public.organization_positions (title, division, parent_position_id, member_id, order_index, period_id) VALUES
   ('Anggota', 'Kewirausahaan (KWH)', p_kwh_head, m_raysha, 51, v_period_id),
   ('Anggota', 'Kewirausahaan (KWH)', p_kwh_head, m_najya, 52, v_period_id),
@@ -199,7 +203,7 @@ BEGIN
   ('Anggota', 'Kewirausahaan (KWH)', p_kwh_head, m_thady, 54, v_period_id),
   ('Anggota', 'Kewirausahaan (KWH)', p_kwh_head, m_mazda, 55, v_period_id);
 
-  -- Level 2: TIK Members (parent = tik_head)
+  -- TIK
   INSERT INTO public.organization_positions (title, division, parent_position_id, member_id, order_index, period_id) VALUES
   ('Anggota', 'TIK', p_tik_head, m_lones, 61, v_period_id),
   ('Anggota', 'TIK', p_tik_head, m_chelsea, 62, v_period_id),

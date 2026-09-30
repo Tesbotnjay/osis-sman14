@@ -12,7 +12,20 @@ export async function LinktreeSection() {
     .order('order_index', { ascending: true });
 
   if (!links || links.length === 0) {
-    return null; // Don't show linktree if empty
+    return (
+      <section className="py-24 bg-secondary/30">
+        <div className="container max-w-2xl mx-auto px-4 md:px-6">
+          <ScrollReveal className="text-center mb-12">
+            <h2 className="font-heading font-extrabold text-3xl text-primary mb-2">
+              Tautan Penting
+            </h2>
+            <p className="text-primary/60 font-medium">
+              Belum ada tautan yang ditambahkan.
+            </p>
+          </ScrollReveal>
+        </div>
+      </section>
+    );
   }
 
   return (

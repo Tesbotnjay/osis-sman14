@@ -138,6 +138,7 @@ export default function LinkPage() {
                   <th className="px-4 py-3 font-semibold capitalize">label</th>
                   <th className="px-4 py-3 font-semibold capitalize">url</th>
                   <th className="px-4 py-3 font-semibold capitalize">enabled</th>
+                  <th className="px-4 py-3 font-semibold">Nomor Urut</th>
                   <th className="px-4 py-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
@@ -153,6 +154,9 @@ export default function LinkPage() {
                     </td>
                     <td className="px-4 py-3">
                       {typeof item.enabled === 'boolean' ? (item.enabled ? <Badge className="bg-green-100 text-green-800">Yes</Badge> : <Badge className="bg-gray-100 text-gray-800">No</Badge>) : String(item.enabled || '-')}
+                    </td>
+                    <td className="px-4 py-3">
+                      {String(item.order_index || 0)}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
@@ -205,7 +209,7 @@ export default function LinkPage() {
             <label htmlFor="enabled" className="text-sm font-medium">Enabled</label>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Order</label>
+            <label className="block text-sm font-medium mb-1">Nomor Urut (0 = Paling Atas)</label>
             <Input 
               type="number"
               value={formData.order_index?.toString() || ''}

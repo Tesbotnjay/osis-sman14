@@ -139,7 +139,7 @@ export default function PositionPage() {
                   <th className="px-4 py-3 font-semibold capitalize">division</th>
                   <th className="px-4 py-3 font-semibold capitalize">member id</th>
                   <th className="px-4 py-3 font-semibold capitalize">parent id</th>
-                  <th className="px-4 py-3 font-semibold capitalize">order</th>
+                  <th className="px-4 py-3 font-semibold">Nomor Urut</th>
                   <th className="px-4 py-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
@@ -197,11 +197,26 @@ export default function PositionPage() {
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Division</label>
-            <Input 
-              type="text"
+            <select
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               value={(formData.division as string) || ''}
               onChange={(e) => setFormData({...formData, 'division': e.target.value})}
-            />
+            >
+              <option value="">Pilih Divisi...</option>
+              <option value="Pembina">Pembina</option>
+              <option value="Pengurus Inti">Pengurus Inti</option>
+              <option value="Sekbid I: Keimanan & Ketakwaan">Sekbid I: Keimanan & Ketakwaan</option>
+              <option value="Sekbid II: Budi Pekerti Luhur">Sekbid II: Budi Pekerti Luhur</option>
+              <option value="Sekbid III: Kepribadian Unggul & Bela Negara">Sekbid III: Kepribadian Unggul & Bela Negara</option>
+              <option value="Sekbid IV: Prestasi Akademik & Olahraga">Sekbid IV: Prestasi Akademik & Olahraga</option>
+              <option value="Sekbid V: Demokrasi & Kepemimpinan">Sekbid V: Demokrasi & Kepemimpinan</option>
+              <option value="Sekbid VI: Kreativitas & Kewirausahaan">Sekbid VI: Kreativitas & Kewirausahaan</option>
+              <option value="Sekbid VII: Kualitas Jasmani & Kesehatan">Sekbid VII: Kualitas Jasmani & Kesehatan</option>
+              <option value="Sekbid VIII: Sastra & Budaya">Sekbid VIII: Sastra & Budaya</option>
+              <option value="Sekbid IX: Teknologi Informasi & Komunikasi">Sekbid IX: Teknologi Informasi & Komunikasi</option>
+              <option value="Sekbid X: Komunikasi Bahasa Inggris">Sekbid X: Komunikasi Bahasa Inggris</option>
+              <option value="Anggota">Anggota</option>
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Member</label>
@@ -220,7 +235,7 @@ export default function PositionPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Order</label>
+            <label className="block text-sm font-medium mb-1">Nomor Urut (0 = Paling Atas)</label>
             <Input 
               type="number"
               value={formData.order_index?.toString() || ''}

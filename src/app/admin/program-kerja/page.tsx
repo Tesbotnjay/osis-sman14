@@ -283,7 +283,7 @@ export default function ProgramPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Order Index</label>
+            <label className="block text-sm font-medium mb-1">Nomor Urut (0 = Paling Atas)</label>
             <Input 
               type="number"
               value={formData['order_index'] || 0}

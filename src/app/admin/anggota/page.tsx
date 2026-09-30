@@ -138,7 +138,7 @@ export default function MemberPage() {
                   <th className="px-4 py-3 font-semibold capitalize">name</th>
                   <th className="px-4 py-3 font-semibold capitalize">description</th>
                   <th className="px-4 py-3 font-semibold capitalize">active</th>
-                  <th className="px-4 py-3 font-semibold capitalize">order</th>
+                  <th className="px-4 py-3 font-semibold">Nomor Urut</th>
                   <th className="px-4 py-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
@@ -217,7 +217,7 @@ export default function MemberPage() {
             <label htmlFor="active" className="text-sm font-medium">Active</label>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Order</label>
+            <label className="block text-sm font-medium mb-1">Nomor Urut (0 = Paling Atas)</label>
             <Input 
               type="number"
               value={formData.order_index?.toString() || ''}

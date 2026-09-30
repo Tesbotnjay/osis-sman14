@@ -33,7 +33,7 @@ export default async function KepengurusanPage() {
       </section>
 
       {/* Gunakan komponen OrganizationChart yang sudah mendukung tree tak terbatas */}
-      <OrganizationChart activePeriodId={activePeriodId} />
+      <OrganizationChart activePeriodId={activePeriodId} isFullPage />
     </div>
   );
 }

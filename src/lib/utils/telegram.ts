@@ -15,8 +15,13 @@ export function encryptToken(token: string): string {
  * Decrypt the Telegram bot token from database.
  */
 export function decryptToken(encrypted: string): string {
-  const bytes = CryptoJS.AES.decrypt(encrypted, ENCRYPTION_KEY)
-  return bytes.toString(CryptoJS.enc.Utf8)
+  try {
+    const bytes = CryptoJS.AES.decrypt(encrypted, ENCRYPTION_KEY)
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8)
+    return decrypted || encrypted // Fallback to plain text if decryption yields empty string
+  } catch (error) {
+    return encrypted // Fallback to plain text if it's not a valid cipher
+  }
 }
 
 interface TelegramMessage {

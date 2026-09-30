@@ -9,12 +9,18 @@ export async function Statistics({ activePeriodId }: StatisticsProps) {
   const supabase = await createClient();
 
   // Query all data and count via .length for maximum reliability
-  const [membersRes, ekskulRes, programsRes, eventsRes] = await Promise.all([
-    supabase.from('members').select('id').eq('active', true),
-    supabase.from('extracurriculars').select('id').eq('active', true),
-    supabase.from('programs').select('id').eq('published', true),
-    supabase.from('events').select('id').eq('published', true),
-  ]);
+  const membersRes = await supabase.from('members').select('id').eq('active', true);
+  const ekskulRes = await supabase.from('extracurriculars').select('id').eq('active', true);
+  const programsRes = await supabase.from('programs').select('id').eq('published', true);
+  const eventsRes = await supabase.from('events').select('id').eq('published', true);
+
+  // Debug: check if there are errors
+  const debugInfo = {
+    members: { count: membersRes.data?.length ?? 'null', error: membersRes.error?.message ?? null },
+    ekskul: { count: ekskulRes.data?.length ?? 'null', error: ekskulRes.error?.message ?? null },
+    programs: { count: programsRes.data?.length ?? 'null', error: programsRes.error?.message ?? null },
+    events: { count: eventsRes.data?.length ?? 'null', error: eventsRes.error?.message ?? null },
+  };
 
   const stats = [
     { label: 'Anggota Pengurus', value: membersRes.data?.length || 0 },
@@ -29,6 +35,11 @@ export async function Statistics({ activePeriodId }: StatisticsProps) {
       <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
       
       <div className="container-editorial relative z-10">
+        {/* Temporary debug - remove after fixing */}
+        <div className="text-white/50 text-[10px] text-center mb-4 font-mono">
+          DEBUG: {JSON.stringify(debugInfo)}
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 divide-x-0 md:divide-x divide-white/10">
           {stats.map((stat, index) => (
             <StatItem 

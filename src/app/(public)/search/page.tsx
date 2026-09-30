@@ -7,6 +7,8 @@ import { ScrollReveal } from '@/components/shared/scroll-reveal';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
+export const dynamic = 'force-dynamic';
+
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
   useEffect(() => {

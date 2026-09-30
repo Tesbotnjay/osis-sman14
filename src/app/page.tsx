@@ -16,6 +16,9 @@ import { LinktreeSection } from '@/components/sections/linktree-section';
 import { RealtimeListener } from '@/components/shared/realtime-listener';
 import { createClient } from '@/lib/supabase/server';
 
+// Always fetch fresh data from database
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const supabase = await createClient();
 

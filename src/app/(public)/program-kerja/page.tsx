@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   description: 'Daftar program kerja OSIS SMA Negeri 14 Samarinda.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProgramKerjaPage({
   searchParams,
 }: {

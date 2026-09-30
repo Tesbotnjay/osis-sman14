@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   title: 'Ekstrakurikuler | OSIS SMA Negeri 14 Samarinda',
 };
 
+export const dynamic = 'force-dynamic';
+
 // Helper function to map category string to an icon (simple heuristic)
 function getIconForCategory(category: string) {
   const cat = (category || '').toLowerCase();

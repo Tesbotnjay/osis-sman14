@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: 'Mengenal lebih dekat Organisasi Siswa Intra Sekolah SMA Negeri 14 Samarinda.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function TentangPage() {
   const supabase = await createClient();
 

@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   title: 'Kepengurusan | OSIS SMA Negeri 14 Samarinda',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function KepengurusanPage() {
   const supabase = await createClient();
 

@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   title: 'Dokumentasi | OSIS SMA Negeri 14 Samarinda',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function DokumentasiPage({
   searchParams,
 }: {

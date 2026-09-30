@@ -38,8 +38,7 @@ export default function PositionPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    let query = supabase.from('organization_positions').select('*');
-    // .order_index('created_at', { ascending: false });
+    let query = supabase.from('organization_positions').select('*').order('order_index', { ascending: true });
     
     const { data: result, error } = await query;
     

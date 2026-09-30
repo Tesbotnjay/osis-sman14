@@ -38,8 +38,7 @@ export default function EventPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    let query = supabase.from('events').select('*');
-    // .order('created_at', { ascending: false });
+    let query = supabase.from('events').select('*').order('date', { ascending: false });
     
     const { data: result, error } = await query;
     

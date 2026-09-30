@@ -34,8 +34,7 @@ export default function UserPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    let query = supabase.from('users').select('*');
-    // .order('created_at', { ascending: false });
+    let query = supabase.from('users').select('*').order('created_at', { ascending: false });
     
     const { data: result, error } = await query;
     

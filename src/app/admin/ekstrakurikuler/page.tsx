@@ -38,8 +38,7 @@ export default function ExtracurricularPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    let query = supabase.from('extracurriculars').select('*');
-    // .order('created_at', { ascending: false });
+    let query = supabase.from('extracurriculars').select('*').order('order_index', { ascending: true });
     
     const { data: result, error } = await query;
     

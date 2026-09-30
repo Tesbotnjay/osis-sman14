@@ -38,8 +38,7 @@ export default function TimelinePage() {
 
   const fetchData = async () => {
     setLoading(true);
-    let query = supabase.from('timeline_items').select('*');
-    // .order('created_at', { ascending: false });
+    let query = supabase.from('timeline_items').select('*').order('order_index', { ascending: true });
     
     const { data: result, error } = await query;
     

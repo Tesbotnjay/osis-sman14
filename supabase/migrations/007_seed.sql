@@ -70,12 +70,19 @@ END $$;
 
 -- 7. Default Homepage Sections
 INSERT INTO public.homepage_sections (section_key, visible, order_index) VALUES
-('hero', true, 1),
-('about', true, 2),
-('vision_mission', true, 3),
-('programs', true, 4),
-('gallery', true, 5),
-('wspiras', true, 6)
+('hero', true, 0),
+('broadcast', true, 1),
+('background', true, 2),
+('statistics', true, 3),
+('vision_mission', true, 4),
+('programs', true, 5),
+('organization', true, 6),
+('extracurriculars', true, 7),
+('agenda', true, 8),
+('timeline', true, 9),
+('wspiras', true, 10),
+('gallery', true, 11),
+('linktree', true, 12)
 ON CONFLICT (section_key) DO NOTHING;
 
 -- 8. Default Site Settings

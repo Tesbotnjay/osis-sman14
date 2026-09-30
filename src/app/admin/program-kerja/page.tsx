@@ -39,8 +39,7 @@ export default function ProgramPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    let query = supabase.from('programs').select('*');
-    // .order('created_at', { ascending: false });
+    let query = supabase.from('programs').select('*').order('order_index', { ascending: true });
     
     const { data: result, error } = await query;
     

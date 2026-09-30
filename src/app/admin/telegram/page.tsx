@@ -5,10 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
+import { testTelegramConnection } from './actions';
+import { Loader2 } from 'lucide-react';
 
 export default function TelegramPage() {
   const [settings, setSettings] = useState({ bot_token_encrypted: '', chat_id: '', enabled: false });
   const [loading, setLoading] = useState(true);
+  const [isTesting, setIsTesting] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -33,13 +36,21 @@ export default function TelegramPage() {
       chat_id: settings.chat_id,
       enabled: settings.enabled,
       destination_type: 'group',
-      id: '00000000-0000-0000-0000-000000000000' // assuming single row or it generates one if we use a specific id, actually let's skip id since we can use an API for telegram settings save or just upsert the single row
+      id: '00000000-0000-0000-0000-000000000000'
     } as any);
     alert('Settings saved!');
   };
 
-  const testConnection = () => {
-    alert('Test connection placeholder. Needs server API implementation.');
+  const testConnection = async () => {
+    setIsTesting(true);
+    try {
+      const result = await testTelegramConnection(settings.bot_token_encrypted, settings.chat_id);
+      alert(result.message);
+    } catch (error) {
+      alert('Terjadi kesalahan yang tidak terduga.');
+    } finally {
+      setIsTesting(false);
+    }
   };
 
   if (loading) return <div className="p-6 flex justify-center"><Spinner /></div>;
@@ -67,7 +78,10 @@ export default function TelegramPage() {
         
         <div className="pt-4 flex gap-2">
           <Button onClick={handleSave} className="bg-primary text-white">Save Configuration</Button>
-          <Button onClick={testConnection} variant="outline">Test Connection</Button>
+          <Button onClick={testConnection} variant="outline" disabled={isTesting}>
+            {isTesting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isTesting ? 'Menguji...' : 'Test Connection'}
+          </Button>
         </div>
       </Card>
     </div>

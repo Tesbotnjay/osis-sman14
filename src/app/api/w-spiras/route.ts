@@ -128,8 +128,8 @@ export async function POST(request: NextRequest) {
     // 8. Record duplicate prevention
     recentMessages.set(duplicateKey, Date.now())
 
-    // 9. Send Telegram notification (async, don't block response)
-    sendTelegramNotificationAsync(supabase, submission)
+    // 9. Send Telegram notification
+    await sendTelegramNotificationAsync(supabase, submission)
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -14,26 +14,36 @@ interface ProgramsPreviewProps {
 }
 
 export async function ProgramsPreview({ activePeriodId }: ProgramsPreviewProps) {
-  if (!activePeriodId) return null;
-
   const supabase = await createClient();
   
-  const { data: rawPrograms } = await supabase
-    .from('programs')
-    .select('id, title, caption, date, status, image_url, featured, order_index')
-    .eq('period_id', activePeriodId)
-    .eq('published', true)
-    .eq('featured', true)
-    .order('order_index', { ascending: true })
-    .order('date', { ascending: true })
-    .limit(4);
+  let programs: any[] = [];
+  
+  if (activePeriodId) {
+    const { data: rawPrograms } = await supabase
+      .from('programs')
+      .select('id, title, caption, date, status, image_url, featured, order_index')
+      .eq('period_id', activePeriodId)
+      .eq('published', true)
+      .eq('featured', true)
+      .order('order_index', { ascending: true })
+      .order('date', { ascending: true })
+      .limit(4);
+    if (rawPrograms) programs = rawPrograms;
+  }
 
-  const programs = rawPrograms as any[];
-
-  if (!programs || programs.length === 0) {
+  if (programs.length === 0) {
     return (
-      <section className="py-24 md:py-32 bg-white text-center">
-        <p className="text-primary/50">Belum ada program kerja unggulan.</p>
+      <section className="py-24 md:py-32 bg-white">
+        <div className="container-editorial">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <ScrollReveal>
+              <h2 className="text-4xl md:text-5xl font-bold text-primary">Program Kerja Unggulan</h2>
+              <p className="mt-4 text-primary/70 text-lg max-w-xl">
+                Belum ada program kerja unggulan yang ditambahkan.
+              </p>
+            </ScrollReveal>
+          </div>
+        </div>
       </section>
     );
   }

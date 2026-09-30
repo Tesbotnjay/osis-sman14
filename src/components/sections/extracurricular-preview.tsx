@@ -10,22 +10,33 @@ interface EkstrakurikulerProps {
 }
 
 export async function ExtracurricularPreview({ activePeriodId }: EkstrakurikulerProps) {
-  if (!activePeriodId) return null;
-
   const supabase = await createClient();
   
-  const { data: ekskuls } = await supabase
-    .from('extracurriculars')
-    .select('id, name, description, logo_url')
-    .eq('period_id', activePeriodId)
-    .eq('active', true)
-    .order('order_index', { ascending: true })
-    .limit(6);
+  let ekskuls: any[] = [];
+  if (activePeriodId) {
+    const { data } = await supabase
+      .from('extracurriculars')
+      .select('id, name, description, logo_url')
+      .eq('period_id', activePeriodId)
+      .eq('active', true)
+      .order('order_index', { ascending: true })
+      .limit(6);
+    if (data) ekskuls = data;
+  }
 
-  if (!ekskuls || ekskuls.length === 0) {
+  if (ekskuls.length === 0) {
     return (
-      <section className="py-24 md:py-32 bg-primary text-white overflow-hidden relative text-center">
-        <p className="text-white/50 relative z-10">Belum ada data ekstrakurikuler.</p>
+      <section className="py-24 md:py-32 bg-primary text-white overflow-hidden relative">
+        <div className="container-editorial relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <ScrollReveal>
+              <h2 className="text-4xl md:text-5xl font-bold">Ekstrakurikuler</h2>
+              <p className="mt-4 text-white/80 text-lg max-w-xl">
+                Belum ada data ekstrakurikuler yang ditambahkan.
+              </p>
+            </ScrollReveal>
+          </div>
+        </div>
       </section>
     );
   }

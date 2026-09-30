@@ -12,22 +12,39 @@ interface GalleryProps {
 }
 
 export async function GalleryPreview({ activePeriodId }: GalleryProps) {
-  if (!activePeriodId) return null;
-
   const supabase = await createClient();
   
-  const { data: images } = await supabase
-    .from('gallery')
-    .select('id, title, date, image_url')
-    .eq('period_id', activePeriodId)
-    .eq('published', true)
-    .order('date', { ascending: false })
-    .limit(5);
+  let images: any[] = [];
+  
+  if (activePeriodId) {
+    const { data } = await supabase
+      .from('gallery')
+      .select('id, title, date, image_url')
+      .eq('period_id', activePeriodId)
+      .eq('published', true)
+      .order('date', { ascending: false })
+      .limit(5);
+    if (data) images = data;
+  }
 
-  if (!images || images.length === 0) {
+  if (images.length === 0) {
     return (
-      <section className="py-24 md:py-32 bg-white relative text-center">
-        <p className="text-primary/50">Belum ada dokumentasi kegiatan.</p>
+      <section className="py-24 md:py-32 bg-white">
+        <div className="container-editorial">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+            <ScrollReveal>
+              <div className="inline-flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center">
+                  <ImageIcon className="w-5 h-5" />
+                </div>
+                <h2 className="text-4xl font-bold text-primary">Dokumentasi</h2>
+              </div>
+              <p className="text-lg text-primary/70 max-w-2xl">
+                Belum ada dokumentasi kegiatan yang dipublikasikan.
+              </p>
+            </ScrollReveal>
+          </div>
+        </div>
       </section>
     );
   }

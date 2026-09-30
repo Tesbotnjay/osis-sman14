@@ -8,22 +8,32 @@ interface TimelineProps {
 }
 
 export async function TimelineSection({ activePeriodId }: TimelineProps) {
-  if (!activePeriodId) return null;
-
   const supabase = await createClient();
   
-  const { data: events } = await supabase
-    .from('timeline_items')
-    .select('id, title, description, date')
-    .eq('period_id', activePeriodId)
-    .eq('published', true)
-    .order('order_index', { ascending: true })
-    .order('date', { ascending: true });
+  let events: any[] = [];
+  
+  if (activePeriodId) {
+    const { data } = await supabase
+      .from('timeline_items')
+      .select('id, title, description, date')
+      .eq('period_id', activePeriodId)
+      .eq('published', true)
+      .order('order_index', { ascending: true })
+      .order('date', { ascending: true });
+    if (data) events = data;
+  }
 
-  if (!events || events.length === 0) {
+  if (events.length === 0) {
     return (
-      <section className="py-24 md:py-32 bg-secondary/20 relative text-center">
-        <p className="text-primary/50">Belum ada timeline kegiatan.</p>
+      <section className="py-24 md:py-32 bg-secondary/20 relative">
+        <div className="container-editorial">
+          <ScrollReveal className="text-center mb-16 md:mb-24">
+            <h2 className="text-4xl md:text-5xl font-bold text-primary mb-4">Perjalanan OSIS</h2>
+            <p className="text-primary/70 text-lg max-w-2xl mx-auto">
+              Belum ada timeline kegiatan yang ditambahkan.
+            </p>
+          </ScrollReveal>
+        </div>
       </section>
     );
   }

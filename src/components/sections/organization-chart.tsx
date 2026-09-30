@@ -23,23 +23,35 @@ interface Position {
 }
 
 export async function OrganizationChart({ activePeriodId }: OrgChartProps) {
-  if (!activePeriodId) return null;
-
   const supabase = await createClient();
   
-  const { data: positions } = await supabase
-    .from('organization_positions')
-    .select(`
-      id, title, division, parent_position_id, order_index,
-      member:members(name, photo_url)
-    `)
-    .eq('period_id', activePeriodId)
-    .order('order_index', { ascending: true });
+  let positions: any[] = [];
+  
+  if (activePeriodId) {
+    const { data } = await supabase
+      .from('organization_positions')
+      .select(`
+        id, title, division, parent_position_id, order_index,
+        member:members(name, photo_url)
+      `)
+      .eq('period_id', activePeriodId)
+      .order('order_index', { ascending: true });
+    if (data) positions = data;
+  }
 
-  if (!positions || positions.length === 0) {
+  if (positions.length === 0) {
     return (
-      <section className="py-24 md:py-32 bg-secondary/30 relative text-center">
-        <p className="text-primary/50">Belum ada struktur kepengurusan.</p>
+      <section className="py-24 md:py-32 bg-secondary/30 relative">
+        <div className="container-editorial">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <ScrollReveal>
+              <h2 className="text-4xl md:text-5xl font-bold text-primary">Kepengurusan</h2>
+              <p className="mt-4 text-primary/70 text-lg max-w-xl">
+                Belum ada struktur kepengurusan yang ditambahkan.
+              </p>
+            </ScrollReveal>
+          </div>
+        </div>
       </section>
     );
   }

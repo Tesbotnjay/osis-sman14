@@ -11,24 +11,37 @@ interface AgendaProps {
 }
 
 export async function AgendaPreview({ activePeriodId }: AgendaProps) {
-  if (!activePeriodId) return null;
-
   const supabase = await createClient();
   const today = new Date().toISOString().split('T')[0];
 
-  const { data: agendas } = await supabase
-    .from('events')
-    .select('id, title, date, start_time, end_time, location')
-    .eq('period_id', activePeriodId)
-    .eq('published', true)
-    .gte('date', today)
-    .order('date', { ascending: true })
-    .limit(3);
+  let agendas: any[] = [];
 
-  if (!agendas || agendas.length === 0) {
+  if (activePeriodId) {
+    const { data } = await supabase
+      .from('events')
+      .select('id, title, date, start_time, end_time, location')
+      .eq('period_id', activePeriodId)
+      .eq('published', true)
+      .gte('date', today)
+      .order('date', { ascending: true })
+      .limit(3);
+      
+    if (data) agendas = data;
+  }
+
+  if (agendas.length === 0) {
     return (
-      <section className="py-24 md:py-32 bg-white relative text-center">
-        <p className="text-primary/50">Belum ada agenda terdekat.</p>
+      <section className="py-24 md:py-32 bg-white relative">
+        <div className="container-editorial">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <ScrollReveal>
+              <h2 className="text-4xl md:text-5xl font-bold text-primary">Agenda Terdekat</h2>
+              <p className="mt-4 text-primary/70 text-lg max-w-xl">
+                Belum ada agenda kegiatan terdekat yang dijadwalkan.
+              </p>
+            </ScrollReveal>
+          </div>
+        </div>
       </section>
     );
   }

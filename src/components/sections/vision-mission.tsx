@@ -7,20 +7,30 @@ interface VisionMissionProps {
 }
 
 export async function VisionMission({ activePeriodId }: VisionMissionProps) {
-  if (!activePeriodId) return null;
-
   const supabase = await createClient();
   
-  const { data: vmData } = await supabase
-    .from('vision_mission')
-    .select('id, vision_text')
-    .eq('period_id', activePeriodId)
-    .single();
+  let vmData = null;
+  
+  if (activePeriodId) {
+    const { data } = await supabase
+      .from('vision_mission')
+      .select('id, vision_text')
+      .eq('period_id', activePeriodId)
+      .single();
+    if (data) vmData = data;
+  }
 
   if (!vmData) {
     return (
-      <section className="py-24 md:py-32 bg-secondary/30 relative text-center">
-        <p className="text-primary/50">Belum ada data visi dan misi.</p>
+      <section className="py-24 md:py-32 bg-secondary/30 relative">
+        <div className="container-editorial">
+          <div className="text-center mb-16 md:mb-24">
+            <h2 className="text-4xl md:text-5xl font-bold text-primary mb-4">Visi & Misi</h2>
+            <p className="text-primary/70 text-lg max-w-2xl mx-auto">
+              Visi dan Misi untuk periode ini belum ditetapkan.
+            </p>
+          </div>
+        </div>
       </section>
     );
   }

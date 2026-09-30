@@ -3,13 +3,62 @@ import Link from 'next/link';
 import { ChevronRight, Users, Target, Rocket } from 'lucide-react';
 import { ScrollReveal } from '@/components/shared/scroll-reveal';
 import { Button } from '@/components/ui/button';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'Tentang | OSIS SMA Negeri 14 Samarinda',
   description: 'Mengenal lebih dekat Organisasi Siswa Intra Sekolah SMA Negeri 14 Samarinda.',
 };
 
-export default function TentangPage() {
+export default async function TentangPage() {
+  const supabase = await createClient();
+
+  // Fetch active period
+  const { data: periodData } = await supabase
+    .from('periods')
+    .select('id, name')
+    .eq('is_active', true)
+    .single();
+
+  const activePeriodId = periodData?.id;
+  const activePeriodName = periodData?.name || '2026/2027';
+
+  // Fetch Background
+  const { data: backgroundData } = await supabase
+    .from('background_content')
+    .select('heading, content, image_url')
+    .limit(1)
+    .single();
+
+  const bgHeading = backgroundData?.heading || 'Apa itu OSIS?';
+  const bgContent = backgroundData?.content || 'Belum ada informasi latar belakang yang ditambahkan.';
+
+  // Fetch Vision & Mission
+  let visionText = 'Belum ada visi yang ditentukan untuk periode ini.';
+  let missions: any[] = [];
+
+  if (activePeriodId) {
+    const { data: vmData } = await supabase
+      .from('vision_mission')
+      .select('id, vision_text')
+      .eq('period_id', activePeriodId)
+      .single();
+
+    if (vmData) {
+      visionText = vmData.vision_text || visionText;
+      
+      const { data: mData } = await supabase
+        .from('mission_items')
+        .select('content')
+        .eq('vision_mission_id', vmData.id)
+        .order('order_index', { ascending: true });
+        
+      if (mData) {
+        missions = mData;
+      }
+    }
+  }
+
   return (
     <div className="flex flex-col w-full">
       {/* Hero Section */}
@@ -41,23 +90,19 @@ export default function TentangPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <ScrollReveal direction="left">
               <div className="relative h-[400px] rounded-2xl overflow-hidden bg-secondary">
-                <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-                  <Users className="w-24 h-24 text-primary/30" />
-                </div>
+                {backgroundData?.image_url ? (
+                  <img src={backgroundData.image_url} alt="Background" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                    <Users className="w-24 h-24 text-primary/30" />
+                  </div>
+                )}
               </div>
             </ScrollReveal>
             <ScrollReveal direction="right">
-              <h2 className="text-3xl font-bold text-primary mb-6">Apa itu OSIS?</h2>
-              <div className="space-y-4 text-primary/80">
-                <p>
-                  Organisasi Siswa Intra Sekolah (OSIS) adalah suatu organisasi yang berada di tingkat sekolah di Indonesia yang dimulai dari Sekolah Menengah Pertama (SMP) dan Sekolah Menengah Atas (SMA).
-                </p>
-                <p>
-                  OSIS dikelola dan dikembangkan oleh siswa-siswa yang terpilih untuk menjadi pengurus OSIS. Organisasi ini memiliki seorang pembimbing dari guru yang dipilih oleh pihak sekolah.
-                </p>
-                <p>
-                  Di SMAN 14 Samarinda, OSIS berperan sebagai motor penggerak berbagai kegiatan kesiswaan, mulai dari ekstrakurikuler, acara tahunan, hingga program sosial kemasyarakatan.
-                </p>
+              <h2 className="text-3xl font-bold text-primary mb-6">{bgHeading}</h2>
+              <div className="space-y-4 text-primary/80 whitespace-pre-line">
+                {bgContent}
               </div>
             </ScrollReveal>
           </div>
@@ -70,7 +115,7 @@ export default function TentangPage() {
           <ScrollReveal>
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-primary">Visi & Misi</h2>
-              <p className="mt-4 text-primary/70">Periode Kepengurusan 2026/2027</p>
+              <p className="mt-4 text-primary/70">Periode Kepengurusan {activePeriodName}</p>
             </div>
           </ScrollReveal>
 
@@ -82,8 +127,8 @@ export default function TentangPage() {
                     <Target className="w-6 h-6 text-primary" />
                   </div>
                   <h3 className="text-2xl font-bold text-primary mb-4">Visi</h3>
-                  <p className="text-primary/80 text-lg leading-relaxed italic font-medium">
-                    "Menjadikan OSIS SMAN 14 Samarinda sebagai organisasi yang proaktif, inovatif, dan berlandaskan iman serta takwa guna mewujudkan siswa-siswi yang berkarakter unggul, kreatif, dan peduli terhadap lingkungan."
+                  <p className="text-primary/80 text-lg leading-relaxed italic font-medium whitespace-pre-line">
+                    {visionText}
                   </p>
                 </div>
               </ScrollReveal>
@@ -96,22 +141,20 @@ export default function TentangPage() {
                     <Rocket className="w-6 h-6 text-primary" />
                   </div>
                   <h3 className="text-2xl font-bold text-primary mb-4">Misi</h3>
-                  <ul className="space-y-4">
-                    {[
-                      'Meningkatkan keimanan dan ketakwaan terhadap Tuhan Yang Maha Esa melalui kegiatan keagamaan.',
-                      'Menumbuhkan kedisiplinan dan tanggung jawab siswa melalui berbagai program kegiatan.',
-                      'Mengoptimalkan peran serta siswa dalam kegiatan ekstrakurikuler untuk mengembangkan minat dan bakat.',
-                      'Menyelenggarakan kegiatan sosial sebagai bentuk kepedulian terhadap lingkungan dan masyarakat sekitar.',
-                      'Membangun sinergi yang baik antara siswa, guru, dan pihak sekolah dalam menciptakan lingkungan belajar yang kondusif.'
-                    ].map((item, index) => (
-                      <li key={index} className="flex items-start gap-4">
-                        <span className="flex-shrink-0 w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-primary font-bold text-sm mt-1">
-                          {index + 1}
-                        </span>
-                        <p className="text-primary/80 pt-1">{item}</p>
-                      </li>
-                    ))}
-                  </ul>
+                  {missions.length > 0 ? (
+                    <ul className="space-y-4">
+                      {missions.map((item, index) => (
+                        <li key={index} className="flex items-start gap-4">
+                          <span className="flex-shrink-0 w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-primary font-bold text-sm mt-1">
+                            {index + 1}
+                          </span>
+                          <p className="text-primary/80 pt-1 whitespace-pre-line">{item.content}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-primary/60 italic">Belum ada misi yang ditambahkan.</p>
+                  )}
                 </div>
               </ScrollReveal>
             </div>
@@ -130,7 +173,7 @@ export default function TentangPage() {
               <div className="bg-white/10 backdrop-blur-sm p-8 md:p-12 rounded-3xl border border-white/20 flex flex-col h-full">
                 <h3 className="text-2xl md:text-3xl font-bold mb-4">Kepengurusan</h3>
                 <p className="text-white/80 mb-8 flex-1">
-                  Kenali lebih dekat para pengurus OSIS SMAN 14 Samarinda periode 2026/2027 yang berdedikasi membangun sekolah.
+                  Kenali lebih dekat para pengurus OSIS SMAN 14 Samarinda periode {activePeriodName} yang berdedikasi membangun sekolah.
                 </p>
                 <Button asChild variant="outline" className="w-fit bg-transparent border-white text-white hover:bg-white hover:text-primary">
                   <Link href="/kepengurusan">

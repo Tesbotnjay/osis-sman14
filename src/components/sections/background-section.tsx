@@ -17,8 +17,19 @@ export async function BackgroundSection({ activePeriodId }: BackgroundSectionPro
 
   if (!data || (!data.heading && !data.content && !data.image_url)) {
     return (
-      <section className="py-24 md:py-32 bg-white relative overflow-hidden text-center">
-        <p className="text-primary/50">Belum ada data latar belakang.</p>
+      <section className="py-24 md:py-32 bg-white relative overflow-hidden">
+        <div className="container-editorial">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+            <ScrollReveal direction="left" className="order-1 lg:order-2">
+              <h2 className="text-3xl md:text-5xl font-bold text-primary mb-6">
+                Latar Belakang OSIS
+              </h2>
+              <div className="prose prose-lg prose-p:text-primary/70 prose-p:leading-relaxed">
+                <p>Belum ada latar belakang OSIS yang ditambahkan.</p>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
       </section>
     );
   }

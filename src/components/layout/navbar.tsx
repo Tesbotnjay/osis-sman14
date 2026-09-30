@@ -45,8 +45,12 @@ export function Navbar() {
       >
         <div className="container mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-heading font-bold text-sm tracking-wider">
-              OSIS
+            <div className="w-10 h-10 relative rounded-full overflow-hidden shadow-sm flex-shrink-0 border-2 border-white/20">
+              <img 
+                src="/logo-osis.jpg" 
+                alt="Logo OSIS SMAN 14" 
+                className="w-full h-full object-cover" 
+              />
             </div>
             <span className={cn(
               "font-heading font-bold text-lg hidden sm:block transition-colors",

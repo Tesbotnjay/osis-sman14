@@ -70,9 +70,18 @@ export async function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
           
           <div className="lg:col-span-5 flex flex-col items-start">
-            <h2 className="font-heading font-extrabold text-3xl md:text-4xl tracking-tight mb-2">
-              {siteName}
-            </h2>
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-12 h-12 relative rounded-full overflow-hidden shadow-md flex-shrink-0 border-2 border-white/20 bg-white">
+                <img 
+                  src="/logo-osis.jpg" 
+                  alt="Logo OSIS SMAN 14" 
+                  className="w-full h-full object-cover" 
+                />
+              </div>
+              <h2 className="font-heading font-extrabold text-3xl md:text-4xl tracking-tight">
+                {siteName}
+              </h2>
+            </div>
             <p className="text-secondary/70 font-medium tracking-widest uppercase mb-6 text-sm">
               {periodData?.name ? `Periode ${periodData.name}` : 'Website Resmi OSIS'}
             </p>

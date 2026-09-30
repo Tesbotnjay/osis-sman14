@@ -151,7 +151,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ===== BROADCAST TICKER ===== */
 @keyframes ticker-scroll {
   0% {
-    transform: translateX(100%);
+    transform: translateX(100vw);
   }
   100% {
     transform: translateX(-100%);

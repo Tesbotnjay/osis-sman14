@@ -202,19 +202,13 @@ export default function PositionPage() {
               onChange={(e) => setFormData({...formData, 'division': e.target.value})}
             >
               <option value="">Pilih Divisi...</option>
-              <option value="Pembina">Pembina</option>
               <option value="Pengurus Inti">Pengurus Inti</option>
-              <option value="Sekbid I: Keimanan & Ketakwaan">Sekbid I: Keimanan & Ketakwaan</option>
-              <option value="Sekbid II: Budi Pekerti Luhur">Sekbid II: Budi Pekerti Luhur</option>
-              <option value="Sekbid III: Kepribadian Unggul & Bela Negara">Sekbid III: Kepribadian Unggul & Bela Negara</option>
-              <option value="Sekbid IV: Prestasi Akademik & Olahraga">Sekbid IV: Prestasi Akademik & Olahraga</option>
-              <option value="Sekbid V: Demokrasi & Kepemimpinan">Sekbid V: Demokrasi & Kepemimpinan</option>
-              <option value="Sekbid VI: Kreativitas & Kewirausahaan">Sekbid VI: Kreativitas & Kewirausahaan</option>
-              <option value="Sekbid VII: Kualitas Jasmani & Kesehatan">Sekbid VII: Kualitas Jasmani & Kesehatan</option>
-              <option value="Sekbid VIII: Sastra & Budaya">Sekbid VIII: Sastra & Budaya</option>
-              <option value="Sekbid IX: Teknologi Informasi & Komunikasi">Sekbid IX: Teknologi Informasi & Komunikasi</option>
-              <option value="Sekbid X: Komunikasi Bahasa Inggris">Sekbid X: Komunikasi Bahasa Inggris</option>
-              <option value="Anggota">Anggota</option>
+              <option value="Agama">Agama</option>
+              <option value="Media Komunikasi (Medkom)">Media Komunikasi (Medkom)</option>
+              <option value="Bela Negara (Belneg)">Bela Negara (Belneg)</option>
+              <option value="Olah Raga">Olah Raga</option>
+              <option value="Kewirausahaan (KWH)">Kewirausahaan (KWH)</option>
+              <option value="TIK">TIK</option>
             </select>
           </div>
           <div>

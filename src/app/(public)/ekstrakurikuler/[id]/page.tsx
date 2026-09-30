@@ -9,12 +9,13 @@ import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: ekskul } = await supabase
     .from('extracurriculars')
     .select('name, description')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (!ekskul) {
@@ -29,13 +30,14 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default async function EkstrakurikulerDetailPage({ params }: { params: { id: string } }) {
+export default async function EkstrakurikulerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
   
   const { data: ekskul } = await supabase
     .from('extracurriculars')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (!ekskul) {

@@ -10,12 +10,13 @@ import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: program } = await supabase
     .from('programs')
     .select('title, caption')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (!program) {
@@ -30,13 +31,14 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default async function ProgramKerjaDetailPage({ params }: { params: { id: string } }) {
+export default async function ProgramKerjaDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
   
   const { data: program } = await supabase
     .from('programs')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (!program) {

@@ -7,7 +7,6 @@ import { createClient } from '@/lib/supabase/server';
 
 interface OrgChartProps {
   activePeriodId?: string | null;
-  /** When true, hides the section header and "Lihat Struktur Lengkap" button */
   isFullPage?: boolean;
 }
 
@@ -45,14 +44,12 @@ export async function OrganizationChart({ activePeriodId, isFullPage = false }: 
     return (
       <section className="py-24 md:py-32 bg-secondary/30 relative">
         <div className="container-editorial">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-            <ScrollReveal>
-              <h2 className="text-4xl md:text-5xl font-bold text-primary">Kepengurusan</h2>
-              <p className="mt-4 text-primary/70 text-lg max-w-xl">
-                Belum ada struktur kepengurusan yang ditambahkan.
-              </p>
-            </ScrollReveal>
-          </div>
+          <ScrollReveal>
+            <h2 className="text-4xl md:text-5xl font-bold text-primary">Kepengurusan</h2>
+            <p className="mt-4 text-primary/70 text-lg max-w-xl">
+              Belum ada struktur kepengurusan yang ditambahkan.
+            </p>
+          </ScrollReveal>
         </div>
       </section>
     );
@@ -62,8 +59,7 @@ export async function OrganizationChart({ activePeriodId, isFullPage = false }: 
   const positionMap = new Map<string, Position>();
   const rootPositions: Position[] = [];
 
-  const castedPositions = positions as any[];
-  castedPositions.forEach(pos => {
+  (positions as any[]).forEach(pos => {
     positionMap.set(pos.id, {
       ...pos,
       member: pos.member ? (Array.isArray(pos.member) ? pos.member[0] : pos.member) : null,
@@ -88,38 +84,59 @@ export async function OrganizationChart({ activePeriodId, isFullPage = false }: 
   rootPositions.sort((a, b) => a.order_index - b.order_index);
   rootPositions.forEach(sortChildren);
 
-  // ============ Render a single node card ============
-  const renderNodeCard = (node: Position, level: number) => {
-    // Size based on level
-    const photoSize = level === 0
-      ? 'w-24 h-24 md:w-28 md:h-28'
-      : level <= 2
-        ? 'w-16 h-16 md:w-20 md:h-20'
-        : 'w-12 h-12 md:w-14 md:h-14';
+  // ==========================================
+  //  Flatten the linear top chain:
+  //  e.g. Pembina → Ketua → Wakil (each has only 1 child)
+  //  Then the first node with multiple children becomes the "branch point"
+  // ==========================================
+  const flattenLinearChain = (root: Position): { chain: Position[]; branchNode: Position | null } => {
+    const chain: Position[] = [];
+    let current: Position | null = root;
 
-    const nameSize = level === 0
-      ? 'text-base md:text-lg'
-      : level <= 2
-        ? 'text-sm'
-        : 'text-xs';
+    while (current) {
+      chain.push(current);
+      if (current.children && current.children.length === 1) {
+        current = current.children[0];
+      } else {
+        break;
+      }
+    }
+
+    const lastNode = chain[chain.length - 1];
+    return {
+      chain,
+      branchNode: (lastNode.children && lastNode.children.length > 1) ? lastNode : null
+    };
+  };
+
+  // ==========================================
+  //  RENDER: Person card (reusable)
+  // ==========================================
+  const PersonCard = ({ node, size = 'md' }: { node: Position; size?: 'lg' | 'md' | 'sm' }) => {
+    const sizeClasses = {
+      lg: { photo: 'w-24 h-24 md:w-28 md:h-28', name: 'text-base md:text-lg', title: 'text-xs', border: 'border-4' },
+      md: { photo: 'w-16 h-16 md:w-20 md:h-20', name: 'text-sm md:text-base', title: 'text-[10px]', border: 'border-3' },
+      sm: { photo: 'w-11 h-11 md:w-13 md:h-13', name: 'text-xs md:text-sm', title: 'text-[9px]', border: 'border-2' },
+    };
+    const s = sizeClasses[size];
 
     return (
-      <div className="flex flex-col items-center text-center group cursor-default relative z-10 px-1">
-        <div className={`rounded-full border-3 border-white shadow-lg overflow-hidden transition-transform duration-300 group-hover:scale-105 relative ${photoSize}`}>
+      <div className="flex flex-col items-center text-center group cursor-default">
+        <div className={`rounded-full ${s.border} border-white shadow-lg overflow-hidden transition-transform duration-300 group-hover:scale-105 relative ${s.photo}`}>
           {node.member?.photo_url ? (
             <Image src={node.member.photo_url} alt={node.member?.name || node.title} fill className="object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary/30 text-[9px]">Foto</div>
           )}
         </div>
-        <h4 className={`font-heading font-bold text-primary leading-tight mt-1.5 max-w-[140px] ${nameSize}`}>
+        <h4 className={`font-heading font-bold text-primary leading-tight mt-1.5 max-w-[150px] ${s.name}`}>
           {node.member?.name || 'Kosong'}
         </h4>
-        <p className="text-[9px] md:text-[10px] font-semibold text-primary/60 uppercase tracking-wider mt-0.5 max-w-[140px] leading-tight">
+        <p className={`font-semibold text-primary/60 uppercase tracking-wider mt-0.5 max-w-[150px] leading-tight ${s.title}`}>
           {node.title}
         </p>
         {node.division && (
-          <p className="text-[8px] md:text-[9px] text-primary/40 mt-0.5 max-w-[140px]">
+          <p className="text-[8px] md:text-[9px] text-primary/40 mt-0.5 max-w-[150px]">
             {node.division}
           </p>
         )}
@@ -127,86 +144,120 @@ export async function OrganizationChart({ activePeriodId, isFullPage = false }: 
     );
   };
 
-  // ============ DESKTOP: Recursive tree with proper SVG-like connectors ============
-  const renderDesktopTree = (node: Position, level: number = 0) => {
-    const hasChildren = node.children && node.children.length > 0;
-    const childCount = node.children?.length || 0;
+  // ==========================================
+  //  Vertical connector line
+  // ==========================================
+  const VerticalLine = ({ height = 'h-6' }: { height?: string }) => (
+    <div className={`w-px ${height} bg-primary/20 mx-auto`} />
+  );
+
+  // ==========================================
+  //  DESKTOP RENDER
+  // ==========================================
+  const renderDesktop = (root: Position) => {
+    const { chain, branchNode } = flattenLinearChain(root);
 
     return (
-      <div key={node.id} className="flex flex-col items-center">
-        {/* The node card itself */}
-        {renderNodeCard(node, level)}
+      <div className="flex flex-col items-center w-full">
+        {/* === LINEAR CHAIN (Pembina → Ketua → Wakil) === */}
+        {chain.map((node, i) => {
+          const isLast = i === chain.length - 1;
+          const size = i === 0 ? 'lg' as const : i === 1 ? 'md' as const : 'md' as const;
+          return (
+            <div key={node.id} className="flex flex-col items-center">
+              {i > 0 && <VerticalLine />}
+              <PersonCard node={node} size={size} />
+            </div>
+          );
+        })}
 
-        {/* Children section */}
-        {hasChildren && (
-          <div className="flex flex-col items-center w-full">
-            {/* Vertical line going down from parent */}
-            <div className="w-px h-6 bg-primary/20" />
+        {/* === BRANCH POINT: multiple children === */}
+        {branchNode && branchNode.children && branchNode.children.length > 0 && (
+          <div className="flex flex-col items-center w-full mt-0">
+            <VerticalLine height="h-8" />
 
-            {childCount === 1 ? (
-              /* Single child: just a straight vertical line */
-              <div className="flex flex-col items-center">
-                {renderDesktopTree(node.children![0], level + 1)}
-              </div>
-            ) : (
-              /* Multiple children: horizontal branch */
-              <div className="flex flex-col items-center w-full">
-                {/* Container for horizontal line + children */}
-                <div className="relative flex justify-center w-full">
-                  {/* The children row */}
-                  <div className="flex justify-center">
-                    {node.children!.map((child, index) => (
-                      <div key={child.id} className="flex flex-col items-center relative" style={{ minWidth: '120px' }}>
-                        {/* Vertical line from horizontal bar to child */}
-                        <div className="w-px h-5 bg-primary/20" />
-                        
-                        {/* Horizontal connector segment */}
-                        {/* Left half */}
-                        {index > 0 && (
-                          <div className="absolute top-0 right-1/2 h-px bg-primary/20" style={{ width: '100%' }} />
-                        )}
-                        {/* Right half */}
-                        {index < childCount - 1 && (
-                          <div className="absolute top-0 left-1/2 h-px bg-primary/20" style={{ width: '100%' }} />
-                        )}
+            {/* Separate Pengurus Inti vs Seksi Bidang */}
+            {(() => {
+              const pengurusInti = branchNode.children.filter(c => c.division === 'Pengurus Inti');
+              const seksiBidang = branchNode.children.filter(c => c.division !== 'Pengurus Inti');
 
-                        {/* Recursively render child */}
-                        {renderDesktopTree(child, level + 1)}
+              return (
+                <div className="flex flex-col items-center w-full gap-10">
+                  {/* PENGURUS INTI row */}
+                  {pengurusInti.length > 0 && (
+                    <div className="flex flex-col items-center w-full">
+                      <div className="bg-primary/5 border border-primary/10 rounded-2xl px-6 py-2 mb-4">
+                        <span className="text-xs font-bold text-primary/60 uppercase tracking-widest">Pengurus Inti</span>
                       </div>
-                    ))}
-                  </div>
+                      <div className="flex flex-wrap justify-center gap-6 md:gap-10">
+                        {pengurusInti.map(child => (
+                          <div key={child.id} className="flex flex-col items-center">
+                            <PersonCard node={child} size="md" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SEKSI BIDANG grid */}
+                  {seksiBidang.length > 0 && (
+                    <div className="flex flex-col items-center w-full">
+                      <div className="bg-primary/5 border border-primary/10 rounded-2xl px-6 py-2 mb-6">
+                        <span className="text-xs font-bold text-primary/60 uppercase tracking-widest">Seksi Bidang</span>
+                      </div>
+                      <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 w-full max-w-5xl">
+                        {seksiBidang.map(coordinator => (
+                          <div key={coordinator.id} className="flex flex-col items-center bg-secondary/20 border border-secondary/40 rounded-2xl p-5 hover:shadow-md transition-shadow">
+                            {/* Coordinator */}
+                            <PersonCard node={coordinator} size="md" />
+
+                            {/* Members of this division */}
+                            {coordinator.children && coordinator.children.length > 0 && (
+                              <div className="flex flex-col items-center w-full mt-4 pt-4 border-t border-primary/10">
+                                <div className="flex flex-wrap justify-center gap-4">
+                                  {coordinator.children.map(member => (
+                                    <div key={member.id} className="flex flex-col items-center">
+                                      <PersonCard node={member} size="sm" />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         )}
       </div>
     );
   };
 
-  // ============ MOBILE: Vertical indented list with branch lines ============
+  // ==========================================
+  //  MOBILE RENDER: Indented tree list
+  // ==========================================
   const renderMobileNode = (node: Position, level: number = 0, isLast: boolean = false) => {
     const hasChildren = node.children && node.children.length > 0;
     const indent = level * 1.5;
 
     return (
       <div key={`mob-${node.id}`} className="relative">
-        {/* Connectors from parent */}
         {level > 0 && (
           <>
-            {/* Horizontal branch line */}
             <div 
               className="absolute top-5 h-px bg-primary/15" 
               style={{ left: `${indent - 1.5}rem`, width: '1.5rem' }} 
             />
-            {/* Vertical line continuing to next sibling */}
             {!isLast && (
               <div 
                 className="absolute top-0 w-px bg-primary/15" 
                 style={{ left: `${indent - 1.5}rem`, height: '100%' }} 
               />
             )}
-            {/* Vertical line stopping at this node (last child) */}
             {isLast && (
               <div 
                 className="absolute top-0 w-px bg-primary/15" 
@@ -216,7 +267,6 @@ export async function OrganizationChart({ activePeriodId, isFullPage = false }: 
           </>
         )}
 
-        {/* Node content */}
         <div 
           className={`flex items-center gap-3 p-2.5 rounded-xl relative z-10 transition-colors ${
             level === 0 ? 'bg-primary/5 border border-primary/10 shadow-sm' : 'bg-white/60'
@@ -244,10 +294,8 @@ export async function OrganizationChart({ activePeriodId, isFullPage = false }: 
           </div>
         </div>
         
-        {/* Children */}
         {hasChildren && (
           <div className="flex flex-col gap-1.5 mt-1.5 relative">
-            {/* Vertical line through all children */}
             <div 
               className="absolute top-0 w-px bg-primary/15" 
               style={{ left: `${indent}rem`, bottom: 0 }} 
@@ -262,14 +310,11 @@ export async function OrganizationChart({ activePeriodId, isFullPage = false }: 
   return (
     <section className={`relative overflow-hidden ${isFullPage ? 'py-12 md:py-16 bg-white' : 'py-24 md:py-32 bg-secondary/30'}`}>
       <div className="container-editorial relative z-10">
-        {/* Only show header when NOT full page (i.e. on homepage) */}
         {!isFullPage && (
           <ScrollReveal className="text-center max-w-3xl mx-auto mb-16 md:mb-24">
             <div className="inline-flex items-center gap-4 mb-6">
               <span className="w-8 h-[2px] bg-primary"></span>
-              <span className="font-heading font-bold tracking-widest text-primary uppercase text-sm">
-                Struktur
-              </span>
+              <span className="font-heading font-bold tracking-widest text-primary uppercase text-sm">Struktur</span>
               <span className="w-8 h-[2px] bg-primary"></span>
             </div>
             <h2 className="font-heading font-extrabold text-4xl md:text-5xl text-primary tracking-tight mb-6">
@@ -281,23 +326,20 @@ export async function OrganizationChart({ activePeriodId, isFullPage = false }: 
           </ScrollReveal>
         )}
 
-        {/* Desktop Tree Chart */}
-        <div className="hidden lg:flex w-full justify-center overflow-x-auto pb-8 mb-8">
-          <div className="min-w-max px-4">
-            <ScrollReveal delay={0.1}>
-              <div className="flex flex-col items-center">
-                {rootPositions.map(root => renderDesktopTree(root, 0))}
-              </div>
-            </ScrollReveal>
-          </div>
+        {/* Desktop: Smart layout */}
+        <div className="hidden md:block mb-8">
+          <ScrollReveal delay={0.1}>
+            {rootPositions.map(root => (
+              <div key={root.id}>{renderDesktop(root)}</div>
+            ))}
+          </ScrollReveal>
         </div>
 
-        {/* Mobile Vertical List */}
-        <div className="lg:hidden flex flex-col gap-1.5 max-w-lg mx-auto mb-8 relative px-2">
+        {/* Mobile: Indented tree list */}
+        <div className="md:hidden flex flex-col gap-1.5 max-w-lg mx-auto mb-8 relative px-2">
           {rootPositions.map((root, i) => renderMobileNode(root, 0, i === rootPositions.length - 1))}
         </div>
 
-        {/* Only show button when NOT full page */}
         {!isFullPage && (
           <ScrollReveal delay={0.4} className="text-center">
             <Button asChild size="lg" className="rounded-full px-8 bg-primary hover:bg-primary/90 text-white font-bold">

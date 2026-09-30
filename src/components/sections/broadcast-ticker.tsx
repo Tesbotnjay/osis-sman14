@@ -17,14 +17,43 @@ interface Broadcast {
 // .animate-ticker:hover { animation-play-state: paused; }
 
 export function BroadcastTicker() {
-  // Placeholder data for now
-  const [broadcasts, setBroadcasts] = useState<Broadcast[]>([
-    { id: '1', message: 'Selamat Datang di Website Resmi OSIS SMA Negeri 14 Samarinda!' },
-    { id: '2', message: 'Pendaftaran Ekstrakurikuler telah dibuka, segera daftar!', link: '/ekstrakurikuler' },
-    { id: '3', message: 'Jangan lupa sampaikan aspirasi kalian melalui W-SPIRAS.', link: '/w-spiras' }
-  ]);
+  const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (broadcasts.length === 0) return null;
+  useEffect(() => {
+    async function fetchBroadcasts() {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        
+        const now = new Date().toISOString();
+        const { data, error } = await supabase
+          .from('broadcasts')
+          .select('id, content')
+          .eq('published', true)
+          .or(`start_at.is.null,start_at.lte.${now}`)
+          .or(`expires_at.is.null,expires_at.gt.${now}`)
+          .order('priority', { ascending: false })
+          .order('created_at', { ascending: false });
+          
+        if (data && !error) {
+          setBroadcasts(data.map(d => ({
+            id: d.id,
+            message: d.content,
+            link: null // Can be enhanced later if links are added to schema
+          })));
+        }
+      } catch (e) {
+        console.error('Failed to fetch broadcasts', e);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    fetchBroadcasts();
+  }, []);
+
+  if (isLoading || broadcasts.length === 0) return null;
 
   const content = broadcasts.map((b) => (
     <span key={b.id} className="inline-flex items-center mx-4 md:mx-8">
@@ -47,7 +76,7 @@ export function BroadcastTicker() {
           We duplicate the content to create a seamless infinite scroll effect.
           The width of inner container needs to be twice, and we animate it moving left by 50%
         */}
-        <div className="inline-block animate-[ticker_30s_linear_infinite] hover:[animation-play-state:paused]">
+        <div className="inline-block ticker-animate">
           {content}
           {content}
         </div>

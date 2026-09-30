@@ -41,7 +41,7 @@ export async function BroadcastTicker() {
   return (
     <section className="w-full bg-secondary border-b-2 border-primary/20 py-3 md:py-4 z-30 relative shadow-md overflow-hidden flex items-center">
       
-      {/* Static Label for Broadcast to make it clear */}
+      {/* Static Label */}
       <div className="absolute left-0 top-0 bottom-0 z-10 flex items-center bg-gradient-to-r from-secondary via-secondary to-transparent px-4 md:px-8 w-32 md:w-48">
         <div className="bg-primary text-white font-bold px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs md:text-sm tracking-widest uppercase shadow-lg flex items-center gap-2">
           <Megaphone className="w-3 h-3 md:w-4 md:h-4" />
@@ -49,13 +49,11 @@ export async function BroadcastTicker() {
         </div>
       </div>
 
-      <div className="w-full inline-block motion-reduce:hidden ml-24 md:ml-40 overflow-hidden relative">
-        {/* 
-          We duplicate the content to create a seamless infinite scroll effect.
-          The animation is defined in globals.css (.ticker-animate)
-        */}
-        <div className="inline-flex items-center ticker-animate hover:[animation-play-state:paused] cursor-default">
-          {contentItems}
+      {/* Right fade */}
+      <div className="absolute right-0 top-0 bottom-0 z-10 w-16 bg-gradient-to-l from-secondary to-transparent pointer-events-none"></div>
+
+      <div className="w-full overflow-hidden motion-reduce:hidden">
+        <div className="inline-flex items-center whitespace-nowrap ticker-animate hover:[animation-play-state:paused] cursor-default">
           {contentItems}
           {contentItems}
         </div>

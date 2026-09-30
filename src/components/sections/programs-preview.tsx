@@ -2,7 +2,7 @@ import { ScrollReveal } from '@/components/shared/scroll-reveal';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Calendar } from 'lucide-react';
+import { ArrowRight, Calendar, FolderOpen } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/server';
@@ -89,50 +89,57 @@ export async function ProgramsPreview({ activePeriodId }: ProgramsPreviewProps) 
           </ScrollReveal>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-fr">
           {programs.map((program, index) => (
             <ScrollReveal 
               key={program.id} 
               delay={index * 0.1}
-              className={index === 0 && programs.length > 2 ? "md:col-span-2 lg:col-span-2" : ""}
+              className="h-full"
             >
-              <Card className="h-full overflow-hidden border-0 bg-secondary/20 hover:bg-secondary/40 transition-colors duration-300 group cursor-pointer flex flex-col">
-                <CardHeader className="p-0">
-                  <div className={`w-full bg-slate-200 relative overflow-hidden ${(index === 0 && programs.length > 2) ? "aspect-[21/9]" : "aspect-[4/3]"}`}>
-                    {program.image_url ? (
-                      <Image 
-                        src={program.image_url} 
-                        alt={program.title} 
-                        fill 
-                        className="object-cover group-hover:scale-105 transition-transform duration-700"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-primary/5 group-hover:bg-transparent transition-colors duration-500" />
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6 md:p-8 flex flex-col flex-grow">
-                  <div className="flex flex-wrap items-center gap-4 mb-4">
-                    <Badge variant="default" className={`${getStatusColor(program.status)} hover:${getStatusColor(program.status)} border-0 shadow-none font-medium`}>
-                      {getStatusLabel(program.status)}
-                    </Badge>
-                    {program.date && (
-                      <div className="flex items-center text-sm text-primary/60 font-medium">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        {format(new Date(program.date), 'dd MMMM yyyy', { locale: id })}
-                      </div>
-                    )}
-                  </div>
-                  <h3 className={`font-heading font-bold text-primary group-hover:text-blue-700 transition-colors mb-3 ${(index === 0 && programs.length > 2) ? "text-2xl md:text-3xl lg:text-4xl" : "text-xl md:text-2xl"}`}>
-                    {program.title}
-                  </h3>
-                  {program.caption && (
-                    <p className="text-primary/70 line-clamp-2 mt-auto">
-                      {program.caption}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
+              <Link href={`/program-kerja/${program.id}`} className="block h-full group">
+                <Card className="h-full overflow-hidden border-0 bg-secondary/20 hover:bg-secondary/40 transition-all duration-300 group-hover:shadow-lg flex flex-col">
+                  <CardHeader className="p-0 flex-shrink-0">
+                    <div className="w-full bg-slate-200 relative overflow-hidden aspect-[4/3]">
+                      {program.image_url ? (
+                        <Image 
+                          src={program.image_url} 
+                          alt={program.title} 
+                          fill 
+                          className="object-cover group-hover:scale-105 transition-transform duration-700"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors duration-500 flex flex-col items-center justify-center">
+                          <FolderOpen className="w-12 h-12 text-primary/20 mb-2" />
+                        </div>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-5 flex flex-col flex-grow">
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <Badge variant="default" className={`${getStatusColor(program.status)} hover:${getStatusColor(program.status)} border-0 shadow-none font-medium text-xs px-2 py-0.5`}>
+                        {getStatusLabel(program.status)}
+                      </Badge>
+                    </div>
+                    <h3 className="font-heading font-bold text-primary group-hover:text-blue-700 transition-colors mb-2 text-lg line-clamp-2">
+                      {program.title}
+                    </h3>
+                    
+                    <div className="mt-auto pt-4 border-t border-primary/5 flex items-center justify-between">
+                      {program.date ? (
+                        <div className="flex items-center text-xs text-primary/60 font-medium">
+                          <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                          {format(new Date(program.date), 'dd MMM yyyy', { locale: id })}
+                        </div>
+                      ) : (
+                        <div className="flex items-center text-xs text-primary/60 font-medium">
+                          <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                          Belum ditentukan
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             </ScrollReveal>
           ))}
         </div>

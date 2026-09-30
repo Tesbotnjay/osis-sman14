@@ -2,8 +2,37 @@ import { ScrollReveal } from '@/components/shared/scroll-reveal';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, ShieldCheck, Zap } from 'lucide-react';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
 
-export function WSpirasCTA() {
+export async function WSpirasCTA() {
+  const supabase = await createClient();
+  
+  // Fetch site settings
+  const { data: settingsData } = await supabase
+    .from('site_settings')
+    .select('key, value')
+    .in('key', ['wspiras_title', 'wspiras_subtitle', 'wspiras_description']);
+
+  let title = 'Sampaikan Aspirasimu!';
+  let subtitle = 'Wadah Aspirasi, Saran & Kritik (W-SPIRAS)';
+  let desc = 'Kami mendengar suara kalian! Sampaikan ide, keluhan, atau saran untuk kemajuan sekolah kita. Sistem pelaporan bersifat anonim dan aman.';
+
+  if (settingsData) {
+    const titleSetting = settingsData.find(s => s.key === 'wspiras_title');
+    if (titleSetting && titleSetting.value) title = titleSetting.value as string;
+
+    const subtitleSetting = settingsData.find(s => s.key === 'wspiras_subtitle');
+    if (subtitleSetting && subtitleSetting.value) subtitle = subtitleSetting.value as string;
+
+    const descSetting = settingsData.find(s => s.key === 'wspiras_description');
+    if (descSetting && descSetting.value) desc = descSetting.value as string;
+  }
+
+  // Split title if it contains a space to make the first part regular and second part colored (optional style)
+  const titleParts = title.split(' ');
+  const titleFirst = titleParts.length > 1 ? titleParts[0] : title;
+  const titleRest = titleParts.length > 1 ? titleParts.slice(1).join(' ') : '';
+
   return (
     <section className="py-24 md:py-32 relative overflow-hidden">
       {/* Background Image / Pattern */}
@@ -22,14 +51,14 @@ export function WSpirasCTA() {
           
           <ScrollReveal>
             <h2 className="font-heading font-extrabold text-5xl md:text-6xl lg:text-7xl text-white tracking-tight mb-4">
-              Sampaikan <br />
-              <span className="text-secondary">Aspirasimu!</span>
+              {titleFirst} <br />
+              {titleRest && <span className="text-secondary">{titleRest}</span>}
             </h2>
             <p className="text-xl md:text-2xl text-white/80 font-medium mb-8 max-w-lg">
-              Wadah Aspirasi, Saran & Kritik (W-SPIRAS)
+              {subtitle}
             </p>
             <p className="text-white/70 text-lg mb-10 leading-relaxed max-w-xl">
-              Kami mendengar suara kalian! Sampaikan ide, keluhan, atau saran untuk kemajuan sekolah kita. Sistem pelaporan bersifat anonim dan aman.
+              {desc}
             </p>
             <Button asChild size="lg" className="rounded-full px-10 py-7 text-lg font-bold bg-white text-primary hover:bg-secondary transition-all shadow-xl hover:shadow-2xl">
               <Link href="/w-spiras">

@@ -2,15 +2,35 @@ import { ScrollReveal } from '@/components/shared/scroll-reveal';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { createClient } from '@/lib/supabase/server';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 
-export function GalleryPreview() {
-  const images = [
-    { id: 1, title: 'LDKS 2026', date: '25 Sep', size: 'large' },
-    { id: 2, title: 'PORAK', date: '18 Agu', size: 'small' },
-    { id: 3, title: 'HUT RI ke-81', date: '17 Agu', size: 'small' },
-    { id: 4, title: 'Baksos', date: '15 Apr', size: 'medium' },
-    { id: 5, title: 'Rapat Kerja', date: '10 Jan', size: 'medium' },
-  ];
+interface GalleryProps {
+  activePeriodId?: string | null;
+}
+
+export async function GalleryPreview({ activePeriodId }: GalleryProps) {
+  if (!activePeriodId) return null;
+
+  const supabase = await createClient();
+  
+  const { data: images } = await supabase
+    .from('gallery')
+    .select('id, title, date, image_url')
+    .eq('period_id', activePeriodId)
+    .eq('published', true)
+    .order('date', { ascending: false })
+    .limit(5);
+
+  if (!images || images.length === 0) {
+    return (
+      <section className="py-24 md:py-32 bg-white relative text-center">
+        <p className="text-primary/50">Belum ada dokumentasi kegiatan.</p>
+      </section>
+    );
+  }
 
   return (
     <section className="py-24 md:py-32 bg-white">
@@ -41,8 +61,8 @@ export function GalleryPreview() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {images.map((img, index) => {
             let spanClass = "col-span-1 row-span-1 aspect-square";
-            if (img.size === 'large') spanClass = "col-span-2 row-span-2 aspect-square md:aspect-auto";
-            if (img.size === 'medium') spanClass = "col-span-2 md:col-span-1 row-span-1 aspect-[2/1] md:aspect-square";
+            if (index === 0) spanClass = "col-span-2 row-span-2 aspect-square md:aspect-auto";
+            if (index === 3 || index === 4) spanClass = "col-span-2 md:col-span-1 row-span-1 aspect-[2/1] md:aspect-square";
             
             return (
               <ScrollReveal 
@@ -50,21 +70,26 @@ export function GalleryPreview() {
                 delay={index * 0.1} 
                 className={`${spanClass} relative rounded-3xl overflow-hidden group cursor-pointer bg-secondary/30`}
               >
-                {/* Image Placeholder */}
-                <div className="absolute inset-0 bg-slate-200 flex items-center justify-center text-slate-400 group-hover:scale-110 transition-transform duration-700 ease-in-out">
-                  <ImageIcon className="w-8 h-8 opacity-50" />
-                </div>
+                {img.image_url ? (
+                  <Image src={img.image_url} alt={img.title || 'Dokumentasi'} fill className="object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out" />
+                ) : (
+                  <div className="absolute inset-0 bg-slate-200 flex items-center justify-center text-slate-400 group-hover:scale-110 transition-transform duration-700 ease-in-out">
+                    <ImageIcon className="w-8 h-8 opacity-50" />
+                  </div>
+                )}
                 
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 
                 {/* Content */}
                 <div className="absolute inset-x-0 bottom-0 p-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                  <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-white text-xs font-bold tracking-widest mb-2">
-                    {img.date}
-                  </span>
+                  {img.date && (
+                    <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-white text-xs font-bold tracking-widest mb-2">
+                      {format(new Date(img.date), 'dd MMM', { locale: id })}
+                    </span>
+                  )}
                   <h3 className="font-heading font-bold text-xl md:text-2xl text-white">
-                    {img.title}
+                    {img.title || 'Kegiatan'}
                   </h3>
                 </div>
               </ScrollReveal>

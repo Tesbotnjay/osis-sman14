@@ -1,45 +1,58 @@
 import { ScrollReveal } from '@/components/shared/scroll-reveal';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { createClient } from '@/lib/supabase/server';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 
-export function ProgramsPreview() {
-  const programs = [
-    {
-      id: 1,
-      title: "Pekan Olahraga Antar Kelas (PORAK)",
-      date: "12 - 18 Agustus 2026",
-      status: "Akan Datang",
-      statusColor: "bg-blue-100 text-blue-700",
-      featured: true,
-    },
-    {
-      id: 2,
-      title: "Latihan Dasar Kepemimpinan (LDKS)",
-      date: "25 September 2026",
-      status: "Akan Datang",
-      statusColor: "bg-blue-100 text-blue-700",
-      featured: false,
-    },
-    {
-      id: 3,
-      title: "Bakti Sosial Ramadhan",
-      date: "15 April 2026",
-      status: "Selesai",
-      statusColor: "bg-green-100 text-green-700",
-      featured: false,
-    },
-    {
-      id: 4,
-      title: "Festival Seni Budaya (FESBUD)",
-      date: "10 November 2026",
-      status: "Perencanaan",
-      statusColor: "bg-orange-100 text-orange-700",
-      featured: false,
+interface ProgramsPreviewProps {
+  activePeriodId?: string | null;
+}
+
+export async function ProgramsPreview({ activePeriodId }: ProgramsPreviewProps) {
+  if (!activePeriodId) return null;
+
+  const supabase = await createClient();
+  
+  const { data: rawPrograms } = await supabase
+    .from('programs')
+    .select('id, title, caption, date, status, image_url, featured, order_index')
+    .eq('period_id', activePeriodId)
+    .eq('published', true)
+    .eq('featured', true)
+    .order('order_index', { ascending: true })
+    .order('date', { ascending: true })
+    .limit(4);
+
+  const programs = rawPrograms as any[];
+
+  if (!programs || programs.length === 0) {
+    return (
+      <section className="py-24 md:py-32 bg-white text-center">
+        <p className="text-primary/50">Belum ada program kerja unggulan.</p>
+      </section>
+    );
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'selesai': return 'bg-green-100 text-green-700';
+      case 'berlangsung': return 'bg-orange-100 text-orange-700';
+      default: return 'bg-blue-100 text-blue-700';
     }
-  ];
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'selesai': return 'Selesai';
+      case 'berlangsung': return 'Berlangsung';
+      default: return 'Akan Datang';
+    }
+  };
 
   return (
     <section className="py-24 md:py-32 bg-white">
@@ -71,28 +84,43 @@ export function ProgramsPreview() {
             <ScrollReveal 
               key={program.id} 
               delay={index * 0.1}
-              className={program.featured ? "md:col-span-2 lg:col-span-2" : ""}
+              className={index === 0 && programs.length > 2 ? "md:col-span-2 lg:col-span-2" : ""}
             >
-              <Card className="h-full overflow-hidden border-0 bg-secondary/20 hover:bg-secondary/40 transition-colors duration-300 group cursor-pointer">
+              <Card className="h-full overflow-hidden border-0 bg-secondary/20 hover:bg-secondary/40 transition-colors duration-300 group cursor-pointer flex flex-col">
                 <CardHeader className="p-0">
-                  <div className={`w-full bg-slate-200 relative overflow-hidden ${program.featured ? "aspect-[21/9]" : "aspect-[4/3]"}`}>
-                    {/* Image placeholder */}
-                    <div className="absolute inset-0 bg-primary/5 group-hover:bg-transparent transition-colors duration-500" />
+                  <div className={`w-full bg-slate-200 relative overflow-hidden ${(index === 0 && programs.length > 2) ? "aspect-[21/9]" : "aspect-[4/3]"}`}>
+                    {program.image_url ? (
+                      <Image 
+                        src={program.image_url} 
+                        alt={program.title} 
+                        fill 
+                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-primary/5 group-hover:bg-transparent transition-colors duration-500" />
+                    )}
                   </div>
                 </CardHeader>
-                <CardContent className="p-6 md:p-8">
-                  <div className="flex items-center gap-4 mb-4">
-                    <Badge variant="default" className={`${program.statusColor} hover:${program.statusColor} border-0 shadow-none font-medium`}>
-                      {program.status}
+                <CardContent className="p-6 md:p-8 flex flex-col flex-grow">
+                  <div className="flex flex-wrap items-center gap-4 mb-4">
+                    <Badge variant="default" className={`${getStatusColor(program.status)} hover:${getStatusColor(program.status)} border-0 shadow-none font-medium`}>
+                      {getStatusLabel(program.status)}
                     </Badge>
-                    <div className="flex items-center text-sm text-primary/60 font-medium">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      {program.date}
-                    </div>
+                    {program.date && (
+                      <div className="flex items-center text-sm text-primary/60 font-medium">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        {format(new Date(program.date), 'dd MMMM yyyy', { locale: id })}
+                      </div>
+                    )}
                   </div>
-                  <h3 className={`font-heading font-bold text-primary group-hover:text-blue-700 transition-colors ${program.featured ? "text-2xl md:text-3xl lg:text-4xl" : "text-xl md:text-2xl"}`}>
+                  <h3 className={`font-heading font-bold text-primary group-hover:text-blue-700 transition-colors mb-3 ${(index === 0 && programs.length > 2) ? "text-2xl md:text-3xl lg:text-4xl" : "text-xl md:text-2xl"}`}>
                     {program.title}
                   </h3>
+                  {program.caption && (
+                    <p className="text-primary/70 line-clamp-2 mt-auto">
+                      {program.caption}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </ScrollReveal>

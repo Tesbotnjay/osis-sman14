@@ -1,7 +1,53 @@
 import Link from 'next/link';
-import { Globe, Send, Play, MessageCircle } from 'lucide-react';
+import { Globe, Send, Play, MessageCircle, Link as LinkIcon, Camera, MessageSquare } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
 
-export function Footer() {
+export async function Footer() {
+  const supabase = await createClient();
+  
+  // Fetch active period
+  const { data: periodData } = await supabase
+    .from('periods')
+    .select('name')
+    .eq('is_active', true)
+    .single();
+
+  // Fetch site settings
+  const { data: settingsData } = await supabase
+    .from('site_settings')
+    .select('key, value')
+    .in('key', ['site_name', 'site_description']);
+
+  let siteName = 'OSIS SMA NEGERI 14 SAMARINDA';
+  let siteDesc = 'Mewujudkan siswa-siswi yang berkarakter, kreatif, dan inovatif melalui berbagai program kerja dan kegiatan ekstrakurikuler.';
+
+  if (settingsData) {
+    const nameSetting = settingsData.find(s => s.key === 'site_name');
+    if (nameSetting && nameSetting.value) siteName = nameSetting.value as string;
+
+    const descSetting = settingsData.find(s => s.key === 'site_description');
+    if (descSetting && descSetting.value) siteDesc = descSetting.value as string;
+  }
+
+  // Fetch social links
+  const { data: socials } = await supabase
+    .from('social_links')
+    .select('platform, url')
+    .eq('enabled', true)
+    .order('order_index', { ascending: true });
+
+  const getIcon = (platform: string) => {
+    const p = platform.toLowerCase();
+    if (p.includes('instagram')) return <Camera className="w-5 h-5" />;
+    if (p.includes('youtube')) return <Play className="w-5 h-5" />;
+    if (p.includes('twitter') || p.includes('x')) return <MessageSquare className="w-5 h-5" />;
+    if (p.includes('facebook')) return <Globe className="w-5 h-5" />;
+    if (p.includes('telegram')) return <Send className="w-5 h-5" />;
+    return <LinkIcon className="w-5 h-5" />;
+  };
+
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="relative bg-primary text-white pt-24 pb-12 overflow-hidden">
       {/* Wavy separator top */}
@@ -25,28 +71,31 @@ export function Footer() {
           
           <div className="lg:col-span-5 flex flex-col items-start">
             <h2 className="font-heading font-extrabold text-3xl md:text-4xl tracking-tight mb-2">
-              OSIS SMA NEGERI 14 SAMARINDA
+              {siteName}
             </h2>
             <p className="text-secondary/70 font-medium tracking-widest uppercase mb-6 text-sm">
-              Periode 2026/2027
+              {periodData?.name ? `Periode ${periodData.name}` : 'Website Resmi OSIS'}
             </p>
-            <p className="text-white/70 max-w-md mb-8 leading-relaxed">
-              Mewujudkan siswa-siswi yang berkarakter, kreatif, dan inovatif melalui berbagai program kerja dan kegiatan ekstrakurikuler.
+            <p className="text-white/70 max-w-md mb-8 leading-relaxed whitespace-pre-line">
+              {siteDesc}
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors" aria-label="Instagram">
-                <Globe className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors" aria-label="Youtube">
-                <Play className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors" aria-label="Twitter">
-                <Send className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors" aria-label="Facebook">
-                <MessageCircle className="w-5 h-5" />
-              </a>
-            </div>
+            
+            {socials && socials.length > 0 && (
+              <div className="flex flex-wrap gap-4">
+                {socials.map((social, idx) => (
+                  <a 
+                    key={idx} 
+                    href={social.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors" 
+                    aria-label={social.platform}
+                  >
+                    {getIcon(social.platform)}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="lg:col-span-2 lg:col-start-8">
@@ -72,7 +121,7 @@ export function Footer() {
 
         <div className="border-t border-white/10 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-white/50 text-sm text-center md:text-left">
-            © 2026 OSIS SMA Negeri 14 Samarinda. All rights reserved.
+            © {currentYear} {siteName}. All rights reserved.
           </p>
           <div className="text-white/50 text-sm">
             Dibuat dengan ❤️ oleh Tim IT OSIS

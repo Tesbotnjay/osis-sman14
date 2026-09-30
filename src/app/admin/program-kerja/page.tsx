@@ -22,6 +22,7 @@ export default function ProgramPage() {
   const [data, setData] = useState<ProgramRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [uploading, setUploading] = useState(false);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -57,9 +58,36 @@ export default function ProgramPage() {
     if (item) {
       setFormData(item as any);
     } else {
-      setFormData({});
+      setFormData({ featured: false, order_index: 0, status: 'akan_datang', published: false });
     }
     setIsModalOpen(true);
+  };
+
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!e.target.files || e.target.files.length === 0) return;
+      const file = e.target.files[0];
+      setUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('programs')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicUrlData } = supabase.storage
+        .from('programs')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, image_url: publicUrlData.publicUrl }));
+    } catch (error: any) {
+      alert('Error uploading image: ' + error.message);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -137,9 +165,9 @@ export default function ProgramPage() {
                 <tr>
                   <th className="px-4 py-3 font-semibold capitalize">title</th>
                   <th className="px-4 py-3 font-semibold capitalize">date</th>
-                  <th className="px-4 py-3 font-semibold capitalize">status</th>
-                  <th className="px-4 py-3 font-semibold capitalize">published</th>
                   <th className="px-4 py-3 font-semibold capitalize">category</th>
+                  <th className="px-4 py-3 font-semibold capitalize">featured</th>
+                  <th className="px-4 py-3 font-semibold capitalize">published</th>
                   <th className="px-4 py-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
@@ -158,19 +186,15 @@ export default function ProgramPage() {
                         : String(item['date'] || '-')}
                     </td>
                     <td className="px-4 py-3">
-                      {typeof item['status'] === 'boolean' 
-                        ? (item['status'] ? <Badge className="bg-green-100 text-green-800">Yes</Badge> : <Badge className="bg-gray-100 text-gray-800">No</Badge>)
-                        : String(item['status'] || '-')}
-                    </td>
-                    <td className="px-4 py-3">
-                      {typeof item['published'] === 'boolean' 
-                        ? (item['published'] ? <Badge className="bg-green-100 text-green-800">Yes</Badge> : <Badge className="bg-gray-100 text-gray-800">No</Badge>)
-                        : String(item['published'] || '-')}
-                    </td>
-                    <td className="px-4 py-3">
                       {typeof item['category'] === 'boolean' 
                         ? (item['category'] ? <Badge className="bg-green-100 text-green-800">Yes</Badge> : <Badge className="bg-gray-100 text-gray-800">No</Badge>)
                         : String(item['category'] || '-')}
+                    </td>
+                    <td className="px-4 py-3">
+                      {item.featured ? <Badge className="bg-amber-100 text-amber-800">Featured</Badge> : <span className="text-gray-400">-</span>}
+                    </td>
+                    <td className="px-4 py-3">
+                      {item.published ? <Badge className="bg-green-100 text-green-800">Yes</Badge> : <Badge className="bg-gray-100 text-gray-800">No</Badge>}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
@@ -245,19 +269,68 @@ export default function ProgramPage() {
               onChange={(e) => setFormData({...formData, status: e.target.value as ProgramRow['status']})}
             >
               <option value="">Select...</option>
-              <option value="planned">planned</option>
-              <option value="ongoing">ongoing</option>
-              <option value="completed">completed</option>
+              <option value="akan_datang">Akan Datang</option>
+              <option value="berlangsung">Berlangsung</option>
+              <option value="selesai">Selesai</option>
             </select>
           </div>
-          <div className="flex items-center gap-2">
-            <input 
-              type="checkbox"
-              id="published"
-              checked={!!formData['published']}
-              onChange={(e) => setFormData({...formData, 'published': e.target.checked})}
+          <div>
+            <label className="block text-sm font-medium mb-1">Caption / Singkatan</label>
+            <Input 
+              type="text"
+              value={formData['caption'] || ''}
+              onChange={(e) => setFormData({...formData, 'caption': e.target.value})}
             />
-            <label htmlFor="published" className="text-sm font-medium">Published</label>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Order Index</label>
+            <Input 
+              type="number"
+              value={formData['order_index'] || 0}
+              onChange={(e) => setFormData({...formData, 'order_index': parseInt(e.target.value) || 0})}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Image URL</label>
+            <div className="flex gap-2 items-center">
+              <Input 
+                type="text"
+                value={formData['image_url'] || ''}
+                onChange={(e) => setFormData({...formData, 'image_url': e.target.value})}
+                placeholder="https://..."
+              />
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleUploadImage}
+                disabled={uploading}
+                className="w-1/2"
+              />
+            </div>
+            {uploading && <span className="text-xs text-blue-500 mt-1 block">Uploading...</span>}
+            {formData['image_url'] && (
+              <img src={formData['image_url']} alt="Preview" className="h-16 object-cover mt-2 rounded" />
+            )}
+          </div>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-2">
+              <input 
+                type="checkbox"
+                id="published"
+                checked={!!formData['published']}
+                onChange={(e) => setFormData({...formData, 'published': e.target.checked})}
+              />
+              <label htmlFor="published" className="text-sm font-medium">Published</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input 
+                type="checkbox"
+                id="featured"
+                checked={!!formData['featured']}
+                onChange={(e) => setFormData({...formData, 'featured': e.target.checked})}
+              />
+              <label htmlFor="featured" className="text-sm font-medium text-amber-600">Featured Program</label>
+            </div>
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>

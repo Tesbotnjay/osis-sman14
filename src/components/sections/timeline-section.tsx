@@ -1,12 +1,32 @@
 import { ScrollReveal } from '@/components/shared/scroll-reveal';
+import { createClient } from '@/lib/supabase/server';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 
-export function TimelineSection() {
-  const events = [
-    { date: 'Agustus 2026', title: 'Pelantikan Pengurus Baru', desc: 'Serah terima jabatan dari pengurus lama ke pengurus baru.' },
-    { date: 'September 2026', title: 'Latihan Dasar Kepemimpinan', desc: 'Pembekalan materi kepemimpinan untuk seluruh pengurus.' },
-    { date: 'Oktober 2026', title: 'Bulan Bahasa & Sumpah Pemuda', desc: 'Rangkaian lomba kebahasaan dan perayaan Sumpah Pemuda.' },
-    { date: 'Desember 2026', title: 'Class Meeting Ganjil', desc: 'Kompetisi olahraga dan e-sports antar kelas pasca ujian.' }
-  ];
+interface TimelineProps {
+  activePeriodId?: string | null;
+}
+
+export async function TimelineSection({ activePeriodId }: TimelineProps) {
+  if (!activePeriodId) return null;
+
+  const supabase = await createClient();
+  
+  const { data: events } = await supabase
+    .from('timeline_items')
+    .select('id, title, description, date')
+    .eq('period_id', activePeriodId)
+    .eq('published', true)
+    .order('order_index', { ascending: true })
+    .order('date', { ascending: true });
+
+  if (!events || events.length === 0) {
+    return (
+      <section className="py-24 md:py-32 bg-secondary/20 relative text-center">
+        <p className="text-primary/50">Belum ada timeline kegiatan.</p>
+      </section>
+    );
+  }
 
   return (
     <section className="py-24 md:py-32 bg-secondary/20 relative">
@@ -31,21 +51,28 @@ export function TimelineSection() {
           <div className="space-y-12 md:space-y-24">
             {events.map((event, index) => {
               const isEven = index % 2 === 0;
+              let dateFormatted = '';
+              if (event.date) {
+                dateFormatted = format(new Date(event.date), 'MMMM yyyy', { locale: id });
+              }
+
               return (
-                <div key={index} className="relative flex flex-col md:flex-row items-center">
+                <div key={event.id} className="relative flex flex-col md:flex-row items-center">
                   
                   {/* Left Content */}
                   <div className={`md:w-1/2 w-full pl-12 md:pl-0 ${isEven ? 'md:pr-16 md:text-right' : 'md:pl-16 md:order-2'}`}>
                     <ScrollReveal direction={isEven ? 'right' : 'left'}>
                       <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-primary/5 hover:shadow-md transition-shadow">
-                        <span className="inline-block py-1 px-3 rounded-full bg-secondary text-primary text-xs font-bold uppercase tracking-widest mb-4">
-                          {event.date}
-                        </span>
+                        {dateFormatted && (
+                          <span className="inline-block py-1 px-3 rounded-full bg-secondary text-primary text-xs font-bold uppercase tracking-widest mb-4">
+                            {dateFormatted}
+                          </span>
+                        )}
                         <h3 className="font-heading font-bold text-2xl text-primary mb-3">
                           {event.title}
                         </h3>
-                        <p className="text-primary/70 font-medium">
-                          {event.desc}
+                        <p className="text-primary/70 font-medium whitespace-pre-line">
+                          {event.description}
                         </p>
                       </div>
                     </ScrollReveal>

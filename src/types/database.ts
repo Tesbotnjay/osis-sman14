@@ -115,6 +115,9 @@ export type Program = {
   category: string | null
   status: ProgramStatus
   published: boolean
+  featured: boolean
+  caption: string | null
+  order_index: number
   period_id: string | null
   created_at: string
   updated_at: string

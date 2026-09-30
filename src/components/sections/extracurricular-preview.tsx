@@ -2,16 +2,33 @@ import { ScrollReveal } from '@/components/shared/scroll-reveal';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { createClient } from '@/lib/supabase/server';
 
-export function ExtracurricularPreview() {
-  const ekskuls = [
-    { name: 'Pramuka', desc: 'Praja Muda Karana' },
-    { name: 'PMR', desc: 'Palang Merah Remaja' },
-    { name: 'Paskibra', desc: 'Pasukan Pengibar Bendera' },
-    { name: 'Rohis', desc: 'Kerohanian Islam' },
-    { name: 'Futsal', desc: 'Olahraga Futsal' },
-    { name: 'KIR', desc: 'Karya Ilmiah Remaja' }
-  ];
+interface EkstrakurikulerProps {
+  activePeriodId?: string | null;
+}
+
+export async function ExtracurricularPreview({ activePeriodId }: EkstrakurikulerProps) {
+  if (!activePeriodId) return null;
+
+  const supabase = await createClient();
+  
+  const { data: ekskuls } = await supabase
+    .from('extracurriculars')
+    .select('id, name, description, logo_url')
+    .eq('period_id', activePeriodId)
+    .eq('active', true)
+    .order('order_index', { ascending: true })
+    .limit(6);
+
+  if (!ekskuls || ekskuls.length === 0) {
+    return (
+      <section className="py-24 md:py-32 bg-primary text-white overflow-hidden relative text-center">
+        <p className="text-white/50 relative z-10">Belum ada data ekstrakurikuler.</p>
+      </section>
+    );
+  }
 
   return (
     <section className="py-24 md:py-32 bg-primary text-white overflow-hidden relative">
@@ -49,16 +66,21 @@ export function ExtracurricularPreview() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
               {ekskuls.map((ekskul, index) => (
                 <ScrollReveal 
-                  key={index} 
+                  key={ekskul.id} 
                   delay={index * 0.1}
                   className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col items-center text-center transition-colors duration-300 backdrop-blur-sm cursor-pointer group"
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    {/* Placeholder icon/logo */}
-                    <div className="w-8 h-8 rounded-full bg-white/20" />
+                  <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 relative overflow-hidden">
+                    {ekskul.logo_url ? (
+                      <Image src={ekskul.logo_url} alt={ekskul.name} fill className="object-cover" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-white/20" />
+                    )}
                   </div>
                   <h3 className="font-heading font-bold text-xl mb-2">{ekskul.name}</h3>
-                  <p className="text-xs text-white/50 uppercase tracking-wider">{ekskul.desc}</p>
+                  <p className="text-xs text-white/50 uppercase tracking-wider line-clamp-2">
+                    {ekskul.description || 'Kegiatan Ekstrakurikuler'}
+                  </p>
                 </ScrollReveal>
               ))}
             </div>

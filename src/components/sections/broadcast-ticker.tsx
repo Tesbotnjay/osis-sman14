@@ -1,92 +1,70 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/server';
 import { Megaphone } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-interface Broadcast {
-  id: string;
-  message: string;
-  link?: string | null;
-}
+export async function BroadcastTicker() {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+  
+  const { data: broadcasts, error } = await supabase
+    .from('broadcasts')
+    .select('id, content')
+    .eq('published', true)
+    .or(`start_at.is.null,start_at.lte.${now}`)
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .order('priority', { ascending: false })
+    .order('created_at', { ascending: false });
 
-// Global CSS animate-ticker should be added in globals.css
-// @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-// .animate-ticker { animation: ticker 20s linear infinite; }
-// .animate-ticker:hover { animation-play-state: paused; }
+  if (!broadcasts || broadcasts.length === 0) {
+    return (
+      <section className="w-full bg-secondary border-b-2 border-primary/20 py-4 z-30 relative shadow-sm">
+        <div className="container mx-auto px-4 flex items-center">
+          <div className="flex-shrink-0 bg-primary text-white font-bold px-4 py-1.5 rounded-full text-xs md:text-sm mr-4 tracking-widest uppercase shadow-md flex items-center gap-2">
+            <Megaphone className="w-4 h-4" />
+            <span>Broadcast</span>
+          </div>
+          <p className="text-primary/70 font-medium italic text-sm">Belum ada broadcast aktif.</p>
+        </div>
+      </section>
+    );
+  }
 
-export function BroadcastTicker() {
-  const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchBroadcasts() {
-      try {
-        const { createClient } = await import('@/lib/supabase/client');
-        const supabase = createClient();
-        
-        const now = new Date().toISOString();
-        const { data, error } = await supabase
-          .from('broadcasts')
-          .select('id, content')
-          .eq('published', true)
-          .or(`start_at.is.null,start_at.lte.${now}`)
-          .or(`expires_at.is.null,expires_at.gt.${now}`)
-          .order('priority', { ascending: false })
-          .order('created_at', { ascending: false });
-          
-        if (data && !error) {
-          setBroadcasts(data.map(d => ({
-            id: d.id,
-            message: d.content,
-            link: null // Can be enhanced later if links are added to schema
-          })));
-        }
-      } catch (e) {
-        console.error('Failed to fetch broadcasts', e);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    
-    fetchBroadcasts();
-  }, []);
-
-  if (isLoading || broadcasts.length === 0) return null;
-
-  const content = broadcasts.map((b) => (
+  // Create the continuous content stream
+  const contentItems = broadcasts.map((b) => (
     <span key={b.id} className="inline-flex items-center mx-4 md:mx-8">
-      <Megaphone className="w-4 h-4 mr-2 text-primary/70" />
-      {b.link ? (
-        <Link href={b.link} className="hover:underline font-medium">
-          {b.message}
-        </Link>
-      ) : (
-        <span className="font-medium">{b.message}</span>
-      )}
+      <span className="font-semibold tracking-wide text-primary whitespace-nowrap">{b.content}</span>
       <span className="mx-4 md:mx-8 text-primary/30">•</span>
     </span>
   ));
 
   return (
-    <div className="bg-secondary text-primary py-3 overflow-hidden whitespace-nowrap relative border-b border-primary/10 flex items-center">
-      <div className="w-full inline-block motion-reduce:hidden">
+    <section className="w-full bg-secondary border-b-2 border-primary/20 py-3 md:py-4 z-30 relative shadow-md overflow-hidden flex items-center">
+      
+      {/* Static Label for Broadcast to make it clear */}
+      <div className="absolute left-0 top-0 bottom-0 z-10 flex items-center bg-gradient-to-r from-secondary via-secondary to-transparent px-4 md:px-8 w-32 md:w-48">
+        <div className="bg-primary text-white font-bold px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs md:text-sm tracking-widest uppercase shadow-lg flex items-center gap-2">
+          <Megaphone className="w-3 h-3 md:w-4 md:h-4" />
+          <span className="hidden md:inline">Broadcast</span>
+        </div>
+      </div>
+
+      <div className="w-full inline-block motion-reduce:hidden ml-24 md:ml-40 overflow-hidden relative">
         {/* 
           We duplicate the content to create a seamless infinite scroll effect.
-          The width of inner container needs to be twice, and we animate it moving left by 50%
+          The animation is defined in globals.css (.ticker-animate)
         */}
-        <div className="inline-block ticker-animate">
-          {content}
-          {content}
+        <div className="inline-flex items-center ticker-animate hover:[animation-play-state:paused] cursor-default">
+          {contentItems}
+          {contentItems}
+          {contentItems}
         </div>
       </div>
       
       {/* Fallback for prefers-reduced-motion */}
-      <div className="hidden motion-reduce:flex items-center justify-center w-full truncate px-4">
-        <Megaphone className="w-4 h-4 mr-2 shrink-0 text-primary/70" />
-        <span className="truncate font-medium">{broadcasts[0]?.message}</span>
+      <div className="hidden motion-reduce:flex items-center w-full truncate ml-24 md:ml-40 pr-4">
+        <span className="truncate font-semibold text-primary">{broadcasts[0]?.content}</span>
       </div>
-    </div>
+    </section>
   );
 }

@@ -1,13 +1,19 @@
 import { ScrollReveal } from '@/components/shared/scroll-reveal';
-import { ExternalLink, Globe, Music, Play } from 'lucide-react';
+import { ExternalLink, Link as LinkIcon } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
 
-export function LinktreeSection() {
-  const links = [
-    { name: 'Instagram Resmi OSIS', icon: Globe, url: '#' },
-    { name: 'Channel Youtube SPABELLA', icon: Play, url: '#' },
-    { name: 'Tiktok OSIS SMAN 14', icon: Music, url: '#' },
-    { name: 'Portal Siswa', icon: ExternalLink, url: '#' },
-  ];
+export async function LinktreeSection() {
+  const supabase = await createClient();
+  
+  const { data: links } = await supabase
+    .from('linktree_items')
+    .select('id, label, url')
+    .eq('enabled', true)
+    .order('order_index', { ascending: true });
+
+  if (!links || links.length === 0) {
+    return null; // Don't show linktree if empty
+  }
 
   return (
     <section className="py-24 bg-secondary/30">
@@ -17,33 +23,32 @@ export function LinktreeSection() {
             OSIS
           </div>
           <h2 className="font-heading font-extrabold text-3xl text-primary mb-2">
-            @osis.sman14smd
+            Tautan Penting
           </h2>
           <p className="text-primary/60 font-medium">
-            Ikuti media sosial kami untuk update terbaru
+            Jelajahi informasi lebih lanjut
           </p>
         </ScrollReveal>
 
         <div className="flex flex-col gap-4">
-          {links.map((link, index) => {
-            const Icon = link.icon;
-            return (
-              <ScrollReveal key={index} delay={index * 0.1}>
-                <a 
-                  href={link.url}
-                  className="flex items-center justify-between p-5 bg-white hover:bg-primary hover:text-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 group border border-primary/5"
-                >
-                  <div className="flex items-center gap-4">
-                    <Icon className="w-6 h-6 text-primary group-hover:text-white transition-colors" />
-                    <span className="font-heading font-bold text-lg text-primary group-hover:text-white transition-colors">
-                      {link.name}
-                    </span>
-                  </div>
-                  <ExternalLink className="w-5 h-5 text-primary/30 group-hover:text-white/70 transition-colors" />
-                </a>
-              </ScrollReveal>
-            );
-          })}
+          {links.map((link, index) => (
+            <ScrollReveal key={link.id} delay={index * 0.1}>
+              <a 
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-5 bg-white hover:bg-primary hover:text-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 group border border-primary/5"
+              >
+                <div className="flex items-center gap-4">
+                  <LinkIcon className="w-6 h-6 text-primary group-hover:text-white transition-colors" />
+                  <span className="font-heading font-bold text-lg text-primary group-hover:text-white transition-colors">
+                    {link.label}
+                  </span>
+                </div>
+                <ExternalLink className="w-5 h-5 text-primary/30 group-hover:text-white/70 transition-colors" />
+              </a>
+            </ScrollReveal>
+          ))}
         </div>
       </div>
     </section>

@@ -1,13 +1,37 @@
 import { ScrollReveal } from '@/components/shared/scroll-reveal';
 import { Quote } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
 
-export function VisionMission() {
-  const missions = [
-    "Meningkatkan keimanan dan ketaqwaan siswa terhadap Tuhan Yang Maha Esa.",
-    "Menumbuhkan rasa kekeluargaan dan kepedulian sosial antar siswa.",
-    "Mengembangkan potensi akademik maupun non-akademik siswa melalui program yang inovatif.",
-    "Menciptakan lingkungan sekolah yang bersih, sehat, dan kondusif."
-  ];
+interface VisionMissionProps {
+  activePeriodId?: string | null;
+}
+
+export async function VisionMission({ activePeriodId }: VisionMissionProps) {
+  if (!activePeriodId) return null;
+
+  const supabase = await createClient();
+  
+  const { data: vmData } = await supabase
+    .from('vision_mission')
+    .select('id, vision_text')
+    .eq('period_id', activePeriodId)
+    .single();
+
+  if (!vmData) {
+    return (
+      <section className="py-24 md:py-32 bg-secondary/30 relative text-center">
+        <p className="text-primary/50">Belum ada data visi dan misi.</p>
+      </section>
+    );
+  }
+
+  const { data: missions } = await supabase
+    .from('mission_items')
+    .select('content')
+    .eq('vision_mission_id', vmData.id)
+    .order('order_index', { ascending: true });
+
+  const missionList = missions?.map(m => m.content) || [];
 
   return (
     <section className="py-24 md:py-32 bg-secondary/30 relative">
@@ -29,8 +53,8 @@ export function VisionMission() {
             
             <div className="relative">
               <Quote className="absolute -top-8 -left-6 w-16 h-16 text-primary/10 rotate-180" />
-              <p className="font-heading text-2xl md:text-3xl lg:text-4xl text-primary leading-tight font-medium z-10 relative">
-                "Menjadikan OSIS SMA Negeri 14 Samarinda sebagai organisasi yang progresif, inklusif, dan berdedikasi dalam mencetak generasi unggul."
+              <p className="font-heading text-2xl md:text-3xl lg:text-4xl text-primary leading-tight font-medium z-10 relative whitespace-pre-line">
+                {vmData.vision_text || "Belum ada teks visi."}
               </p>
             </div>
           </ScrollReveal>
@@ -44,18 +68,22 @@ export function VisionMission() {
               Misi Kami
             </h2>
             
-            <ul className="space-y-8">
-              {missions.map((mission, index) => (
-                <li key={index} className="flex gap-6 items-start group">
-                  <span className="flex-shrink-0 w-12 h-12 rounded-full bg-secondary flex items-center justify-center font-heading font-bold text-xl text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
-                    {index + 1}
-                  </span>
-                  <p className="text-lg text-primary/80 leading-relaxed font-medium pt-2">
-                    {mission}
-                  </p>
-                </li>
-              ))}
-            </ul>
+            {missionList.length > 0 ? (
+              <ul className="space-y-8">
+                {missionList.map((mission, index) => (
+                  <li key={index} className="flex gap-6 items-start group">
+                    <span className="flex-shrink-0 w-12 h-12 rounded-full bg-secondary flex items-center justify-center font-heading font-bold text-xl text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                      {index + 1}
+                    </span>
+                    <p className="text-lg text-primary/80 leading-relaxed font-medium pt-2 whitespace-pre-line">
+                      {mission}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-primary/50 text-lg">Belum ada daftar misi.</p>
+            )}
           </ScrollReveal>
 
         </div>

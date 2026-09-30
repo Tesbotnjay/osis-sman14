@@ -1,6 +1,31 @@
 import { ScrollReveal } from '@/components/shared/scroll-reveal';
+import { createClient } from '@/lib/supabase/server';
+import Image from 'next/image';
 
-export function BackgroundSection() {
+interface BackgroundSectionProps {
+  activePeriodId?: string | null;
+}
+
+export async function BackgroundSection({ activePeriodId }: BackgroundSectionProps) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('background_content')
+    .select('*')
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (!data || (!data.heading && !data.content && !data.image_url)) {
+    return (
+      <section className="py-24 md:py-32 bg-white relative overflow-hidden text-center">
+        <p className="text-primary/50">Belum ada data latar belakang.</p>
+      </section>
+    );
+  }
+
+  // Split content by double newline for paragraphs if available, else just one paragraph
+  const paragraphs = data.content ? data.content.split('\n\n') : [];
+
   return (
     <section className="py-24 md:py-32 bg-white relative overflow-hidden">
       <div className="container-editorial">
@@ -8,8 +33,16 @@ export function BackgroundSection() {
           
           <ScrollReveal direction="right" className="order-2 lg:order-1 relative">
             <div className="aspect-[4/5] w-full max-w-md mx-auto lg:mx-0 relative rounded-2xl overflow-hidden bg-secondary">
-              {/* Image Placeholder */}
-              <div className="absolute inset-0 bg-slate-200" />
+              {data.image_url ? (
+                <Image 
+                  src={data.image_url} 
+                  alt="Latar Belakang OSIS" 
+                  fill 
+                  className="object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-slate-200" />
+              )}
               
               {/* Decorative elements */}
               <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-primary rounded-full mix-blend-multiply opacity-10" />
@@ -31,18 +64,14 @@ export function BackgroundSection() {
               </span>
             </div>
             
-            <h2 className="font-heading font-extrabold text-4xl md:text-5xl lg:text-6xl text-primary mb-8 leading-[1.1] tracking-tight">
-              Latar Belakang <br className="hidden md:block" />
-              <span className="text-primary/70">OSIS SMAN 14</span>
+            <h2 className="font-heading font-extrabold text-4xl md:text-5xl lg:text-6xl text-primary mb-8 leading-[1.1] tracking-tight whitespace-pre-line">
+              {data.heading || 'Latar Belakang OSIS'}
             </h2>
             
             <div className="space-y-6 text-lg text-primary/80 leading-relaxed font-body">
-              <p>
-                Organisasi Siswa Intra Sekolah (OSIS) SMA Negeri 14 Samarinda adalah wadah berhimpunnya siswa-siswi berdedikasi tinggi yang berkomitmen untuk memajukan almamater melalui berbagai kegiatan positif, kreatif, dan inovatif.
-              </p>
-              <p>
-                Sebagai motor penggerak kegiatan kesiswaan, kami memfasilitasi pengembangan minat, bakat, dan potensi diri setiap siswa, serta menumbuhkan jiwa kepemimpinan dan kemandirian yang berlandaskan pada nilai-nilai kebangsaan dan keagamaan.
-              </p>
+              {paragraphs.map((p: string, i: number) => (
+                <p key={i}>{p}</p>
+              ))}
             </div>
           </ScrollReveal>
 

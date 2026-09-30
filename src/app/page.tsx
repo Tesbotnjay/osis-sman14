@@ -24,7 +24,8 @@ export default async function Home() {
     .from('periods')
     .select('id, name')
     .eq('is_active', true)
-    .single();
+    .limit(1)
+    .maybeSingle();
 
   const activePeriodId = periodData?.id || null;
 

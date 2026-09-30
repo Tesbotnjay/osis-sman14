@@ -17,7 +17,7 @@ export async function ExtracurricularPreview({ activePeriodId }: Ekstrakurikuler
     const { data } = await supabase
       .from('extracurriculars')
       .select('id, name, description, logo_url')
-      .eq('period_id', activePeriodId)
+      .or(`period_id.eq.${activePeriodId},period_id.is.null`)
       .eq('active', true)
       .order('order_index', { ascending: true })
       .limit(6);

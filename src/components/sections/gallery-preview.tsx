@@ -20,9 +20,10 @@ export async function GalleryPreview({ activePeriodId }: GalleryProps) {
     const { data } = await supabase
       .from('gallery')
       .select('id, title, date, image_url')
-      .eq('period_id', activePeriodId)
+      .or(`period_id.eq.${activePeriodId},period_id.is.null`)
       .eq('published', true)
-      .order('date', { ascending: false })
+      .order('date', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
       .limit(5);
     if (data) images = data;
   }

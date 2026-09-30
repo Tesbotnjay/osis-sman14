@@ -6,16 +6,6 @@ interface StatisticsProps {
 }
 
 export async function Statistics({ activePeriodId }: StatisticsProps) {
-  if (!activePeriodId) {
-    return (
-      <section className="py-20 md:py-28 bg-primary relative">
-        <div className="container-editorial relative z-10 text-center text-white/70">
-          <p>Belum ada data statistik untuk periode aktif.</p>
-        </div>
-      </section>
-    );
-  }
-
   const supabase = await createClient();
   const { data, error } = await supabase.rpc('get_statistics');
 

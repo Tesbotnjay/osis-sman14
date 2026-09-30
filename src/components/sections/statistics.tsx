@@ -35,11 +35,6 @@ export async function Statistics({ activePeriodId }: StatisticsProps) {
       <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
       
       <div className="container-editorial relative z-10">
-        {/* Temporary debug - remove after fixing */}
-        <div className="text-white/50 text-[10px] text-center mb-4 font-mono">
-          DEBUG: {JSON.stringify(debugInfo)}
-        </div>
-
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 divide-x-0 md:divide-x divide-white/10">
           {stats.map((stat, index) => (
             <StatItem 

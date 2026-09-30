@@ -7,20 +7,32 @@ interface StatisticsProps {
 
 export async function Statistics({ activePeriodId }: StatisticsProps) {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc('get_statistics');
 
-  const statsData = data || {
-    members: 0,
-    extracurriculars: 0,
-    programs: 0,
-    events: 0
-  };
+  // Query directly from tables instead of RPC for reliability
+  const [membersRes, ekskulRes, programsRes, eventsRes] = await Promise.all([
+    supabase
+      .from('members')
+      .select('id', { count: 'exact', head: true })
+      .eq('active', true),
+    supabase
+      .from('extracurriculars')
+      .select('id', { count: 'exact', head: true })
+      .eq('active', true),
+    supabase
+      .from('programs')
+      .select('id', { count: 'exact', head: true })
+      .eq('published', true),
+    supabase
+      .from('events')
+      .select('id', { count: 'exact', head: true })
+      .eq('published', true),
+  ]);
 
   const stats = [
-    { label: 'Anggota Pengurus', value: statsData.members || 0 },
-    { label: 'Ekstrakurikuler', value: statsData.extracurriculars || 0 },
-    { label: 'Program Kerja', value: statsData.programs || 0 },
-    { label: 'Kegiatan Tahunan', value: statsData.events || 0 },
+    { label: 'Anggota Pengurus', value: membersRes.count || 0 },
+    { label: 'Ekstrakurikuler', value: ekskulRes.count || 0 },
+    { label: 'Program Kerja', value: programsRes.count || 0 },
+    { label: 'Kegiatan Tahunan', value: eventsRes.count || 0 },
   ];
 
   return (

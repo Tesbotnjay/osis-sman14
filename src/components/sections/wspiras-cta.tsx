@@ -63,6 +63,7 @@ export async function WSpirasCTA() {
             <Button 
               asChild 
               size="lg" 
+              variant="secondary"
               className="group rounded-full px-10 py-8 text-xl font-extrabold bg-white text-primary hover:bg-secondary/20 border-2 border-transparent hover:border-white/50 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] hover:-translate-y-1"
             >
               <Link href="/w-spiras" className="flex items-center justify-center">

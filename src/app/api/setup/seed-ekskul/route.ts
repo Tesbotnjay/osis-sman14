@@ -109,44 +109,23 @@ export async function GET(request: Request) {
       }
     ];
 
-    const results = [];
-
-    for (const ekskul of ekskuls) {
-      // Check if exists
-      const { data: existing } = await supabase
-        .from('extracurriculars')
-        .select('id')
-        .eq('name', ekskul.name)
-        .eq('period_id', activePeriodId)
-        .single();
-
-      if (existing) {
-        // Update existing
-        const { data, error } = await supabase
-          .from('extracurriculars')
-          .update(ekskul)
-          .eq('id', existing.id)
-          .select();
-        results.push({ name: ekskul.name, status: 'updated', error });
-      } else {
-        // Insert new
-        const { data, error } = await supabase
-          .from('extracurriculars')
-          .insert(ekskul)
-          .select();
-        results.push({ name: ekskul.name, status: 'inserted', error });
-      }
-    }
-
-    // Optional: Delete dummy ekskuls like 'Pramuka', 'PMR' etc. if they are not in the new list
-    const validNames = ekskuls.map(e => e.name);
+    // Delete all extracurriculars for the active period
     const { error: deleteError } = await supabase
       .from('extracurriculars')
       .delete()
-      .not('name', 'in', `(${validNames.join(',')})`)
       .eq('period_id', activePeriodId);
 
-    return NextResponse.json({ success: true, results, deletedDummies: !deleteError });
+    if (deleteError) {
+      return NextResponse.json({ error: 'Failed to clear existing extracurriculars', details: deleteError }, { status: 500 });
+    }
+
+    // Insert all
+    const { data: insertedData, error: insertError } = await supabase
+      .from('extracurriculars')
+      .insert(ekskuls)
+      .select();
+
+    return NextResponse.json({ success: true, results: insertedData, error: insertError });
 
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

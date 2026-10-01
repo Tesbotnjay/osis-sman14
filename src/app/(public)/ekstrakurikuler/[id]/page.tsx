@@ -109,17 +109,42 @@ export default async function EkstrakurikulerDetailPage({ params }: { params: Pr
                     </div>
                   </div>
                   
-                  {ekskul.social_links && typeof ekskul.social_links === 'object' && Object.entries(ekskul.social_links).map(([platform, url]) => (
-                    <div key={platform} className="flex items-center gap-3">
-                      <ExternalLink className="w-5 h-5 text-primary/60" />
-                      <div>
-                        <p className="text-xs text-primary/60 capitalize">{platform}</p>
-                        <Link href={url as string} target="_blank" rel="noopener noreferrer" className="font-semibold text-blue-600 hover:underline line-clamp-1">
-                          {String(url).replace(/^https?:\/\/(www\.)?/, '')}
-                        </Link>
-                      </div>
+                  {ekskul.social_links && typeof ekskul.social_links === 'object' && Object.keys(ekskul.social_links).length > 0 && (
+                    <div className="flex items-center gap-3 mt-4 sm:mt-0 sm:col-span-2 lg:col-span-1">
+                      {(() => {
+                        const links = ekskul.social_links as any;
+                        let url = '';
+                        let label = 'Kunjungi Halaman';
+                        
+                        if (links.url) {
+                          url = links.url;
+                          label = links.label || 'Kunjungi Halaman';
+                        } else if (links.instagram) {
+                          url = links.instagram;
+                          label = 'Instagram';
+                        } else {
+                          // Try to find any URL
+                          const firstKey = Object.keys(links)[0];
+                          url = links[firstKey];
+                          label = firstKey;
+                        }
+
+                        if (!url || typeof url !== 'string' || !url.startsWith('http')) return null;
+
+                        return (
+                          <Link 
+                            href={url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors font-semibold text-sm shadow-sm hover:shadow"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            {label}
+                          </Link>
+                        );
+                      })()}
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             </div>

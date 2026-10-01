@@ -84,19 +84,25 @@ export async function ExtracurricularPreview({ activePeriodId }: Ekstrakurikuler
                 <ScrollReveal 
                   key={ekskul.id} 
                   delay={index * 0.1}
-                  className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col items-center text-center transition-colors duration-300 backdrop-blur-sm cursor-pointer group"
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 relative overflow-hidden">
-                    {ekskul.logo_url ? (
-                      <Image src={ekskul.logo_url} alt={ekskul.name} fill className="object-cover" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-white/20" />
-                    )}
-                  </div>
-                  <h3 className="font-heading font-bold text-xl mb-2">{ekskul.name}</h3>
-                  <p className="text-xs text-white/50 uppercase tracking-wider line-clamp-2">
-                    {ekskul.description || 'Kegiatan Ekstrakurikuler'}
-                  </p>
+                  <Link 
+                    href={`/ekstrakurikuler/${ekskul.id}`}
+                    className="block bg-white/5 hover:bg-white/10 border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col items-center text-center transition-colors duration-300 backdrop-blur-sm cursor-pointer group h-full"
+                  >
+                    <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 relative overflow-hidden">
+                      {ekskul.logo_url ? (
+                        <Image src={ekskul.logo_url} alt={ekskul.name} fill className="object-cover" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-white/20" />
+                      )}
+                    </div>
+                    <h3 className="font-heading font-bold text-xl mb-4">{ekskul.name}</h3>
+                    
+                    <div className="mt-auto pt-2 flex items-center text-xs font-semibold text-white/50 group-hover:text-white transition-colors">
+                      Lihat Selengkapnya 
+                      <ArrowRight className="ml-1.5 w-3 h-3 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </Link>
                 </ScrollReveal>
               ))}
             </div>

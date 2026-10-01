@@ -87,18 +87,14 @@ export default async function EkstrakurikulerPage() {
                             <Icon className="w-7 h-7" />
                           )}
                         </div>
-                        <h3 className="text-xl font-bold text-primary mb-2 group-hover:text-primary/80">{ekskul.name}</h3>
-                        {ekskul.description && (
-                          <p className="text-primary/80 line-clamp-3 text-sm">
-                            {ekskul.description}
-                          </p>
-                        )}
-                        {ekskul.pembina && (
-                          <div className="mt-4 pt-4 border-t border-secondary/40">
-                            <p className="text-xs font-semibold text-primary/60 uppercase tracking-wider mb-1">Pembina</p>
-                            <p className="text-sm text-primary font-medium">{ekskul.pembina}</p>
-                          </div>
-                        )}
+                        <h3 className="text-xl font-bold text-primary mb-4 group-hover:text-primary/80">{ekskul.name}</h3>
+                        
+                        <div className="mt-6 flex items-center text-sm font-semibold text-primary group-hover:text-blue-600 transition-colors">
+                          Lihat Selengkapnya 
+                          <svg className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
                       </div>
                     </Link>
                   </ScrollReveal>

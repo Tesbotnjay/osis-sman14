@@ -207,6 +207,24 @@ export default function ExtracurricularPage() {
             />
           </div>
           <div>
+            <label className="block text-sm font-medium mb-1">Logo URL (Optional)</label>
+            <Input 
+              type="text"
+              placeholder="https://..."
+              value={formData.logo_url || ''}
+              onChange={(e) => setFormData({...formData, logo_url: e.target.value})}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Photo URL (Optional)</label>
+            <Input 
+              type="text"
+              placeholder="https://..."
+              value={formData.photo_url || ''}
+              onChange={(e) => setFormData({...formData, photo_url: e.target.value})}
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium mb-1">Pembina</label>
             <Input 
               type="text"
@@ -237,6 +255,38 @@ export default function ExtracurricularPage() {
               type="number"
               value={formData.order_index || ''}
               onChange={(e) => setFormData({...formData, order_index: parseInt(e.target.value)})}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Social Label (e.g., Instagram, Link Tree)</label>
+            <Input 
+              type="text"
+              placeholder="Instagram"
+              value={formData.social_links && typeof formData.social_links === 'object' && (formData.social_links as any).label 
+                ? (formData.social_links as any).label 
+                : formData.social_links && typeof formData.social_links === 'object' && (formData.social_links as any).instagram 
+                  ? 'Instagram' 
+                  : (formData.social_links && typeof formData.social_links === 'object' ? Object.keys(formData.social_links)[0] || '' : '')}
+              onChange={(e) => {
+                const currentLinks = typeof formData.social_links === 'object' ? formData.social_links : {};
+                const currentUrl = (currentLinks as any)?.url || (currentLinks as any)?.instagram || Object.values(currentLinks || {})[0] || '';
+                setFormData({...formData, social_links: { label: e.target.value, url: currentUrl }});
+              }}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Social URL</label>
+            <Input 
+              type="url"
+              placeholder="https://instagram.com/..."
+              value={formData.social_links && typeof formData.social_links === 'object' 
+                ? ((formData.social_links as any).url || (formData.social_links as any).instagram || Object.values(formData.social_links)[0] || '')
+                : ''}
+              onChange={(e) => {
+                const currentLinks = typeof formData.social_links === 'object' ? formData.social_links : {};
+                const currentLabel = (currentLinks as any)?.label || (currentLinks as any)?.instagram ? 'Instagram' : Object.keys(currentLinks || {})[0] || 'Instagram';
+                setFormData({...formData, social_links: { label: currentLabel, url: e.target.value }});
+              }}
             />
           </div>
           <div className="flex justify-end gap-2 pt-4">

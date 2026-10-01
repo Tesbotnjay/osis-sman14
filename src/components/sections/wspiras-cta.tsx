@@ -63,15 +63,12 @@ export async function WSpirasCTA() {
             <Button 
               asChild 
               size="lg" 
-              className="group relative overflow-hidden rounded-full px-10 py-8 text-xl font-extrabold bg-white text-primary hover:bg-white border border-transparent hover:border-white/50 transition-all duration-500 shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] hover:-translate-y-1"
+              className="group rounded-full px-10 py-8 text-xl font-extrabold bg-white text-primary hover:bg-secondary/20 border-2 border-transparent hover:border-white/50 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] hover:-translate-y-1"
             >
-              <Link href="/w-spiras" className="flex items-center">
-                <span className="absolute inset-0 bg-gradient-to-r from-white via-secondary to-white opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <span className="relative flex items-center z-10">
-                  <MessageSquare className="mr-3 w-6 h-6 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-12" />
-                  Mulai Suarakan
-                  <ArrowRight className="w-6 h-6 max-w-0 opacity-0 overflow-hidden transition-all duration-500 ease-out group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-3 group-hover:translate-x-1" />
-                </span>
+              <Link href="/w-spiras" className="flex items-center justify-center">
+                <MessageSquare className="mr-3 w-6 h-6 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-12" />
+                <span className="relative z-10">Mulai Suarakan</span>
+                <ArrowRight className="w-6 h-6 max-w-0 opacity-0 overflow-hidden transition-all duration-300 ease-out group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-3 group-hover:translate-x-1" />
               </Link>
             </Button>
           </ScrollReveal>

@@ -91,6 +91,7 @@ export function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) {
             >
               <Button 
                 asChild 
+                variant="ghost"
                 className="w-full rounded-full py-6 text-lg font-bold bg-white text-primary hover:bg-white/90"
               >
                 <Link href="/w-spiras" onClick={onClose}>

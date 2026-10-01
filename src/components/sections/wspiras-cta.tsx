@@ -1,6 +1,6 @@
 import { ScrollReveal } from '@/components/shared/scroll-reveal';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, ShieldCheck, Zap } from 'lucide-react';
+import { MessageSquare, ShieldCheck, Zap, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 
@@ -60,10 +60,18 @@ export async function WSpirasCTA() {
             <p className="text-white/70 text-lg mb-10 leading-relaxed max-w-xl">
               {desc}
             </p>
-            <Button asChild size="lg" className="rounded-full px-10 py-7 text-lg font-bold bg-white text-primary hover:bg-secondary transition-all shadow-xl hover:shadow-2xl">
-              <Link href="/w-spiras">
-                <MessageSquare className="mr-3 w-6 h-6" />
-                Mulai Suarakan
+            <Button 
+              asChild 
+              size="lg" 
+              className="group relative overflow-hidden rounded-full px-10 py-8 text-xl font-extrabold bg-white text-primary hover:bg-white border border-transparent hover:border-white/50 transition-all duration-500 shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:shadow-[0_0_40px_rgba(255,255,255,0.4)] hover:-translate-y-1"
+            >
+              <Link href="/w-spiras" className="flex items-center">
+                <span className="absolute inset-0 bg-gradient-to-r from-white via-secondary to-white opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <span className="relative flex items-center z-10">
+                  <MessageSquare className="mr-3 w-6 h-6 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-12" />
+                  Mulai Suarakan
+                  <ArrowRight className="w-6 h-6 max-w-0 opacity-0 overflow-hidden transition-all duration-500 ease-out group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-3 group-hover:translate-x-1" />
+                </span>
               </Link>
             </Button>
           </ScrollReveal>

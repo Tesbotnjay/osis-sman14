@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import { Globe, Send, Play, MessageCircle, Link as LinkIcon, Camera, MessageSquare } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 
@@ -130,10 +130,10 @@ export async function Footer() {
 
         <div className="border-t border-white/10 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-white/50 text-sm text-center md:text-left">
-            © {currentYear} {siteName}. All rights reserved.
+            Â© {currentYear} {siteName}. All rights reserved.
           </p>
           <div className="text-white/50 text-sm">
-            Dibuat dengan ❤️ oleh Tim IT OSIS
+            Dibuat dengan â¤ï¸ oleh Tim MEDKOM OSIS
           </div>
         </div>
       </div>

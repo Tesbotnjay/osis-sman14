@@ -130,10 +130,10 @@ export async function Footer() {
 
         <div className="border-t border-white/10 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-white/50 text-sm text-center md:text-left">
-            Â© {currentYear} {siteName}. All rights reserved.
+            &copy; {currentYear} {siteName}. All rights reserved.
           </p>
           <div className="text-white/50 text-sm">
-            Dibuat dengan â¤ï¸ oleh Tim MEDKOM OSIS
+            Dibuat dengan {'\u2764\uFE0F'} oleh Tim MEDKOM OSIS
           </div>
         </div>
       </div>

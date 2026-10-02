@@ -6,6 +6,8 @@ import {
   MessageSquare, TrendingUp, Clock, ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 interface StatCardProps {
   label: string
@@ -61,6 +63,55 @@ function ActivityItem({ action, time, user }: ActivityItemProps) {
 
 export default function AdminOverviewPage() {
   const { profile } = useAuth()
+  const [stats, setStats] = useState({
+    members: 0,
+    ekskuls: 0,
+    programs: 0,
+    gallery: 0,
+    events: 0,
+    wspiras: 0,
+    wspirasNew: 0
+  })
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const supabase = createClient()
+      
+      try {
+        const [
+          { count: membersCount },
+          { count: ekskulsCount },
+          { count: programsCount },
+          { count: galleryCount },
+          { count: eventsCount },
+          { count: wspirasCount },
+          { count: wspirasNewCount }
+        ] = await Promise.all([
+          supabase.from('members').select('*', { count: 'exact', head: true }),
+          supabase.from('extracurriculars').select('*', { count: 'exact', head: true }),
+          supabase.from('programs').select('*', { count: 'exact', head: true }),
+          supabase.from('gallery').select('*', { count: 'exact', head: true }),
+          supabase.from('events').select('*', { count: 'exact', head: true }),
+          supabase.from('w_spiras').select('*', { count: 'exact', head: true }),
+          supabase.from('w_spiras').select('*', { count: 'exact', head: true }).eq('status', 'baru')
+        ])
+
+        setStats({
+          members: membersCount || 0,
+          ekskuls: ekskulsCount || 0,
+          programs: programsCount || 0,
+          gallery: galleryCount || 0,
+          events: eventsCount || 0,
+          wspiras: wspirasCount || 0,
+          wspirasNew: wspirasNewCount || 0
+        })
+      } catch (error) {
+        console.error('Failed to fetch stats:', error)
+      }
+    }
+
+    fetchStats()
+  }, [])
 
   return (
     <div>
@@ -76,13 +127,13 @@ export default function AdminOverviewPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
-        <StatCard label="Total Anggota" value={0} icon={Users} href="/admin/anggota" />
-        <StatCard label="Ekstrakurikuler" value={0} icon={Trophy} href="/admin/ekstrakurikuler" />
-        <StatCard label="Program Kerja" value={0} icon={FolderKanban} href="/admin/program-kerja" />
-        <StatCard label="Dokumentasi" value={0} icon={Image} href="/admin/gallery" />
-        <StatCard label="Kegiatan" value={0} icon={Calendar} href="/admin/kalender" />
-        <StatCard label="W-SPIRAS" value={0} icon={MessageSquare} href="/admin/w-spiras" />
-        <StatCard label="W-SPIRAS Baru" value={0} icon={MessageSquare} href="/admin/w-spiras" />
+        <StatCard label="Total Anggota" value={stats.members} icon={Users} href="/admin/anggota" />
+        <StatCard label="Ekstrakurikuler" value={stats.ekskuls} icon={Trophy} href="/admin/ekstrakurikuler" />
+        <StatCard label="Program Kerja" value={stats.programs} icon={FolderKanban} href="/admin/program-kerja" />
+        <StatCard label="Dokumentasi" value={stats.gallery} icon={Image} href="/admin/gallery" />
+        <StatCard label="Kegiatan" value={stats.events} icon={Calendar} href="/admin/kalender" />
+        <StatCard label="W-SPIRAS" value={stats.wspiras} icon={MessageSquare} href="/admin/w-spiras" />
+        <StatCard label="W-SPIRAS Baru" value={stats.wspirasNew} icon={MessageSquare} href="/admin/w-spiras" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

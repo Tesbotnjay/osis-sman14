@@ -51,13 +51,13 @@ export function Modal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-modal-backdrop flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-modal-backdrop flex items-start sm:items-center justify-center overflow-y-auto p-4 sm:p-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-primary/20 backdrop-blur-sm"
+            className="fixed inset-0 bg-primary/20 backdrop-blur-sm"
             aria-hidden="true"
           />
           
@@ -68,7 +68,7 @@ export function Modal({
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
-              'relative z-modal w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl',
+              'relative z-modal w-full max-w-lg rounded-2xl bg-white shadow-xl my-4 sm:my-8 flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)]',
               className
             )}
             role="dialog"
@@ -76,7 +76,7 @@ export function Modal({
             aria-labelledby={title ? 'modal-title' : undefined}
           >
             {(!hideCloseButton || title) && (
-              <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <div className="flex items-center justify-between border-b border-border px-6 py-4 shrink-0">
                 <div>
                   {title && (
                     <h2 id="modal-title" className="text-xl font-heading font-semibold text-text-primary">
@@ -99,7 +99,7 @@ export function Modal({
               </div>
             )}
             
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto flex-1">
               {children}
             </div>
           </motion.div>
@@ -108,3 +108,4 @@ export function Modal({
     </AnimatePresence>
   )
 }
+

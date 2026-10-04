@@ -17,6 +17,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { GalleryUploader } from '@/components/admin/gallery-uploader';
 
 export default function ExtracurricularPage() {
   const [data, setData] = useState<EkstrakurikulerRow[]>([]);
@@ -289,22 +290,15 @@ export default function ExtracurricularPage() {
               }}
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Gallery URLs (Pisahkan dengan koma/baris baru)</label>
-            <Textarea 
-              placeholder="https://i.ibb.co/123/img.jpg&#10;https://i.ibb.co/456/img.jpg"
-              value={formData.social_links && typeof formData.social_links === 'object' && Array.isArray((formData.social_links as any).gallery)
-                ? ((formData.social_links as any).gallery).join('\n')
-                : ''}
-              onChange={(e) => {
-                const currentLinks = typeof formData.social_links === 'object' && formData.social_links ? formData.social_links : {};
-                const urls = e.target.value.split(/[\n,]+/).map(u => u.trim()).filter(Boolean);
-                setFormData({...formData, social_links: { ...currentLinks, gallery: urls }});
-              }}
-              rows={3}
-            />
-            <p className="text-xs text-gray-500 mt-1">Upload foto ke Discord/ImgBB lalu paste URL gambar ke sini untuk menghemat storage.</p>
-          </div>
+          <GalleryUploader
+            urls={formData.social_links && typeof formData.social_links === 'object' && Array.isArray((formData.social_links as any).gallery)
+              ? (formData.social_links as any).gallery
+              : []}
+            onChange={(urls) => {
+              const currentLinks = typeof formData.social_links === 'object' && formData.social_links ? formData.social_links : {};
+              setFormData({...formData, social_links: { ...currentLinks, gallery: urls }});
+            }}
+          />
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
             <Button type="submit" className="bg-primary text-white">Save</Button>

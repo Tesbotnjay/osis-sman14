@@ -160,8 +160,8 @@ export default async function EkstrakurikulerDetailPage({ params }: { params: Pr
                             src={url}
                             alt={`Gallery ${ekskul.name} ${i + 1}`}
                             fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                             className="object-cover transition-transform duration-500 group-hover:scale-110"
-                            unoptimized={url.startsWith('http') && !url.includes(process.env.NEXT_PUBLIC_SUPABASE_URL || 'supabase')}
                           />
                         </div>
                       ))}

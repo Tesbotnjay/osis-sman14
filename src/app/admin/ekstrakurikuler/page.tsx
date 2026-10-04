@@ -266,11 +266,11 @@ export default function ExtracurricularPage() {
                 ? (formData.social_links as any).label 
                 : formData.social_links && typeof formData.social_links === 'object' && (formData.social_links as any).instagram 
                   ? 'Instagram' 
-                  : (formData.social_links && typeof formData.social_links === 'object' ? Object.keys(formData.social_links)[0] || '' : '')}
+                  : (formData.social_links && typeof formData.social_links === 'object' ? Object.keys(formData.social_links).filter(k => k !== 'gallery')[0] || '' : '')}
               onChange={(e) => {
-                const currentLinks = typeof formData.social_links === 'object' ? formData.social_links : {};
-                const currentUrl = (currentLinks as any)?.url || (currentLinks as any)?.instagram || Object.values(currentLinks || {})[0] || '';
-                setFormData({...formData, social_links: { label: e.target.value, url: currentUrl }});
+                const currentLinks = typeof formData.social_links === 'object' && formData.social_links ? formData.social_links : {};
+                const currentUrl = (currentLinks as any)?.url || (currentLinks as any)?.instagram || Object.values(currentLinks).filter(v => typeof v === 'string')[0] || '';
+                setFormData({...formData, social_links: { ...currentLinks, label: e.target.value, url: currentUrl }});
               }}
             />
           </div>
@@ -280,14 +280,30 @@ export default function ExtracurricularPage() {
               type="url"
               placeholder="https://instagram.com/..."
               value={formData.social_links && typeof formData.social_links === 'object' 
-                ? ((formData.social_links as any).url || (formData.social_links as any).instagram || Object.values(formData.social_links)[0] || '')
+                ? ((formData.social_links as any).url || (formData.social_links as any).instagram || Object.values(formData.social_links).filter(v => typeof v === 'string')[0] || '')
                 : ''}
               onChange={(e) => {
-                const currentLinks = typeof formData.social_links === 'object' ? formData.social_links : {};
-                const currentLabel = (currentLinks as any)?.label || (currentLinks as any)?.instagram ? 'Instagram' : Object.keys(currentLinks || {})[0] || 'Instagram';
-                setFormData({...formData, social_links: { label: currentLabel, url: e.target.value }});
+                const currentLinks = typeof formData.social_links === 'object' && formData.social_links ? formData.social_links : {};
+                const currentLabel = (currentLinks as any)?.label || (currentLinks as any)?.instagram ? 'Instagram' : Object.keys(currentLinks).filter(k => k !== 'gallery')[0] || 'Instagram';
+                setFormData({...formData, social_links: { ...currentLinks, label: currentLabel, url: e.target.value }});
               }}
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Gallery URLs (Pisahkan dengan koma/baris baru)</label>
+            <Textarea 
+              placeholder="https://i.ibb.co/123/img.jpg&#10;https://i.ibb.co/456/img.jpg"
+              value={formData.social_links && typeof formData.social_links === 'object' && Array.isArray((formData.social_links as any).gallery)
+                ? ((formData.social_links as any).gallery).join('\n')
+                : ''}
+              onChange={(e) => {
+                const currentLinks = typeof formData.social_links === 'object' && formData.social_links ? formData.social_links : {};
+                const urls = e.target.value.split(/[\n,]+/).map(u => u.trim()).filter(Boolean);
+                setFormData({...formData, social_links: { ...currentLinks, gallery: urls }});
+              }}
+              rows={3}
+            />
+            <p className="text-xs text-gray-500 mt-1">Upload foto ke Discord/ImgBB lalu paste URL gambar ke sini untuk menghemat storage.</p>
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>

@@ -123,10 +123,12 @@ export default async function EkstrakurikulerDetailPage({ params }: { params: Pr
                           url = links.instagram;
                           label = 'Instagram';
                         } else {
-                          // Try to find any URL
-                          const firstKey = Object.keys(links)[0];
-                          url = links[firstKey];
-                          label = firstKey;
+                          // Try to find any URL except gallery
+                          const firstKey = Object.keys(links).filter(k => k !== 'gallery')[0];
+                          if (firstKey) {
+                            url = links[firstKey];
+                            label = firstKey;
+                          }
                         }
 
                         if (!url || typeof url !== 'string' || !url.startsWith('http')) return null;
@@ -146,6 +148,26 @@ export default async function EkstrakurikulerDetailPage({ params }: { params: Pr
                     </div>
                   )}
                 </div>
+
+                {/* Gallery Section */}
+                {ekskul.social_links && typeof ekskul.social_links === 'object' && Array.isArray((ekskul.social_links as any).gallery) && (ekskul.social_links as any).gallery.length > 0 && (
+                  <div className="mt-12">
+                    <h2 className="text-2xl font-bold text-primary mb-6">Gallery Kenangan</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {((ekskul.social_links as any).gallery as string[]).map((url, i) => (
+                        <div key={i} className="relative aspect-square sm:aspect-video rounded-xl overflow-hidden group border border-secondary/30 shadow-sm bg-secondary/10">
+                          <Image
+                            src={url}
+                            alt={`Gallery ${ekskul.name} ${i + 1}`}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                            unoptimized={url.startsWith('http') && !url.includes(process.env.NEXT_PUBLIC_SUPABASE_URL || 'supabase')}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </ScrollReveal>

@@ -18,6 +18,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { GalleryUploader } from '@/components/admin/gallery-uploader';
+import { ImageUploader } from '@/components/admin/image-uploader';
 
 export default function ExtracurricularPage() {
   const [data, setData] = useState<EkstrakurikulerRow[]>([]);
@@ -207,24 +208,16 @@ export default function ExtracurricularPage() {
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Logo URL (Optional)</label>
-            <Input 
-              type="text"
-              placeholder="https://..."
-              value={formData.logo_url || ''}
-              onChange={(e) => setFormData({...formData, logo_url: e.target.value})}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Photo URL (Optional)</label>
-            <Input 
-              type="text"
-              placeholder="https://..."
-              value={formData.photo_url || ''}
-              onChange={(e) => setFormData({...formData, photo_url: e.target.value})}
-            />
-          </div>
+          <ImageUploader
+            label="Logo Ekstrakurikuler (Optional)"
+            value={formData.logo_url || ''}
+            onChange={(url) => setFormData({...formData, logo_url: url})}
+          />
+          <ImageUploader
+            label="Foto Sampul (Optional)"
+            value={formData.photo_url || ''}
+            onChange={(url) => setFormData({...formData, photo_url: url})}
+          />
           <div>
             <label className="block text-sm font-medium mb-1">Pembina</label>
             <Input 

@@ -17,6 +17,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { ImageUploader } from '@/components/admin/image-uploader';
 
 export default function MemberPage() {
   const [data, setData] = useState<MemberRow[]>([]);
@@ -198,14 +199,11 @@ export default function MemberPage() {
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Photo</label>
-            <Input 
-              type="file"
-              value={(formData.photo_url as string) || ''}
-              onChange={(e) => setFormData({...formData, 'photo_url': e.target.value})}
-            />
-          </div>
+          <ImageUploader
+            label="Foto Anggota"
+            value={(formData.photo_url as string) || ''}
+            onChange={(url) => setFormData({...formData, photo_url: url})}
+          />
           <div className="flex items-center gap-2">
             <input 
               type="checkbox"

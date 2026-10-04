@@ -10,7 +10,9 @@ import { Card } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
-import { Plus } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Plus, Trash2 } from 'lucide-react';
+import { ImageUploader } from '@/components/admin/image-uploader';
 
 export default function GalleryPage() {
   const [items, setItems] = useState<GalleryRow[]>([]);
@@ -18,6 +20,8 @@ export default function GalleryPage() {
   const supabase = createClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<GalleryInsert>>({});
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchItems();
@@ -32,12 +36,24 @@ export default function GalleryPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.image_url) {
+      alert('Gambar wajib diisi!');
+      return;
+    }
     if (formData.id) {
       await supabase.from('gallery').update(formData as any).eq('id', formData.id);
     } else {
-      await supabase.from('gallery').insert([formData as any]);
+      await supabase.from('gallery').insert([{ ...formData, published: true } as any]);
     }
     setIsModalOpen(false);
+    fetchItems();
+  };
+
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    await supabase.from('gallery').delete().eq('id', deletingId);
+    setIsConfirmOpen(false);
+    setDeletingId(null);
     fetchItems();
   };
 
@@ -46,21 +62,26 @@ export default function GalleryPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-primary">Gallery</h1>
-          <p className="text-gray-500">Manage photos and images.</p>
+          <p className="text-gray-500">Kelola foto dokumentasi OSIS.</p>
         </div>
         <Button onClick={() => { setFormData({}); setIsModalOpen(true); }} className="bg-primary text-white">
-          <Plus className="w-4 h-4 mr-2" /> Add Image
+          <Plus className="w-4 h-4 mr-2" /> Tambah Foto
         </Button>
       </div>
 
       {loading ? <div className="flex justify-center py-12"><Spinner /></div> : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {items.map(item => (
-            <Card key={item.id} className="overflow-hidden cursor-pointer hover:ring-2 ring-primary/50" onClick={() => { setFormData(item); setIsModalOpen(true); }}>
-              <div className="aspect-square bg-secondary/30 relative">
-                {item.image_url ? <img src={item.image_url} className="w-full h-full object-cover" alt={item.title || undefined} /> : <div className="p-4 flex items-center justify-center h-full text-xs text-gray-400">No Image URL</div>}
+            <Card key={item.id} className="overflow-hidden group relative">
+              <div className="aspect-square bg-secondary/30 relative cursor-pointer" onClick={() => { setFormData(item); setIsModalOpen(true); }}>
+                {item.image_url ? <img src={item.image_url} className="w-full h-full object-cover" alt={item.title || undefined} /> : <div className="p-4 flex items-center justify-center h-full text-xs text-gray-400">No Image</div>}
               </div>
-              <div className="p-2 text-sm truncate font-medium">{item.title || 'Untitled'}</div>
+              <div className="p-2 flex justify-between items-center">
+                <span className="text-sm truncate font-medium">{item.title || 'Untitled'}</span>
+                <Button size="sm" variant="danger" onClick={() => { setDeletingId(item.id); setIsConfirmOpen(true); }}>
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </div>
             </Card>
           ))}
         </div>
@@ -68,12 +89,24 @@ export default function GalleryPage() {
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Gallery Item">
         <form onSubmit={handleSave} className="space-y-4">
-          <div><label className="block text-sm font-medium mb-1">Title</label><Input value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} /></div>
-          <div><label className="block text-sm font-medium mb-1">Image URL</label><Input value={formData.image_url || ''} onChange={e => setFormData({...formData, image_url: e.target.value})} /></div>
-          <div><label className="block text-sm font-medium mb-1">Category</label><Input value={formData.category || ''} onChange={e => setFormData({...formData, category: e.target.value})} /></div>
-          <div className="flex justify-end pt-4"><Button type="submit">Save</Button></div>
+          <div><label className="block text-sm font-medium mb-1">Judul</label><Input value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} /></div>
+          <ImageUploader
+            label="Foto"
+            value={formData.image_url || ''}
+            onChange={(url) => setFormData({...formData, image_url: url})}
+          />
+          <div><label className="block text-sm font-medium mb-1">Kategori</label><Input value={formData.category || ''} onChange={e => setFormData({...formData, category: e.target.value})} /></div>
+          <div className="flex justify-end pt-4"><Button type="submit" className="bg-primary text-white">Simpan</Button></div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="Hapus Foto"
+        description="Yakin ingin menghapus foto ini?"
+      />
     </div>
   );
 }

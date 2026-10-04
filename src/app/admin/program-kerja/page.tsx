@@ -13,6 +13,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { ImageUploader } from '@/components/admin/image-uploader';
 import { Database } from '@/types/database';
 
 type ProgramRow = Database['public']['Tables']['programs']['Row'];
@@ -289,28 +290,11 @@ export default function ProgramPage() {
               onChange={(e) => setFormData({...formData, 'order_index': parseInt(e.target.value) || 0})}
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Image URL</label>
-            <div className="flex gap-2 items-center">
-              <Input 
-                type="text"
-                value={formData['image_url'] || ''}
-                onChange={(e) => setFormData({...formData, 'image_url': e.target.value})}
-                placeholder="https://..."
-              />
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleUploadImage}
-                disabled={uploading}
-                className="w-1/2"
-              />
-            </div>
-            {uploading && <span className="text-xs text-blue-500 mt-1 block">Uploading...</span>}
-            {formData['image_url'] && (
-              <img src={formData['image_url']} alt="Preview" className="h-16 object-cover mt-2 rounded" />
-            )}
-          </div>
+          <ImageUploader
+            label="Foto Program"
+            value={formData['image_url'] || ''}
+            onChange={(url) => setFormData({...formData, image_url: url})}
+          />
           <div className="flex gap-4">
             <div className="flex items-center gap-2">
               <input 

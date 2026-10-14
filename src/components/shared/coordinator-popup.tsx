@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, type MouseEvent } from 'react'
 import { AtSign, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -21,7 +21,7 @@ export function CoordinatorPopup({
   instagram,
 }: CoordinatorPopupProps) {
   // Close on escape key
-  React.useEffect(() => {
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose()
@@ -38,7 +38,7 @@ export function CoordinatorPopup({
   }, [isOpen, onClose])
 
   // Close when clicking outside
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose()
     }

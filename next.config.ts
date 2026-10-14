@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
         hostname: '*.googleusercontent.com',
       },
     ],
+    localPatterns: [
+      {
+        pathname: '/api/protected-image/**',
+        search: '',
+      },
+    ],
     formats: ['image/avif', 'image/webp'],
   },
   // Enable server-side Sharp image processing

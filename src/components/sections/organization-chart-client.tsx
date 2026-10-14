@@ -6,8 +6,11 @@ import { CoordinatorPopup } from '@/components/shared/coordinator-popup'
 
 // Data coordinators from PRD 6.A-C
 const COORDINATOR_DATA: Record<string, { position: string; instagram: string }> = {
+  // Pembimbing & Pembina
   'List Hartiningsih': { position: 'Pembimbing', instagram: 'https://instagram.com/elhaningsih?obrf=NjliazhtdWU1c2h0' },
-  'Ahmad Saleh, S.Pd.': { position: 'Pembina', instagram: 'https://instagram.com/saleh.ahmad93' },
+  'Ahmad Saleh, S.Pd.': { position: 'Pembina OSIS', instagram: 'https://instagram.com/saleh.ahmad93' },
+
+  // Pengurus Inti
   'Muhammad Rizky Andhika': { position: 'Ketua OSIS', instagram: 'https://instagram.com/rizandhi1' },
   'Rizky': { position: 'Ketua OSIS', instagram: 'https://instagram.com/rizandhi1' },
   'Naura Ken Nurul Izzah': { position: 'Wakil Ketua OSIS', instagram: 'https://instagram.com/kensheauie' },
@@ -16,12 +19,14 @@ const COORDINATOR_DATA: Record<string, { position: string; instagram: string }> 
   'Alfiora Bilqies Izzati Sharomah': { position: 'Sekretaris 2', instagram: 'https://instagram.com/fioeszzsh' },
   'Tristan Elvis Pratama Putra': { position: 'Bendahara 1', instagram: 'https://instagram.com/elvtris' },
   'Adalicia Allese Lisulembang': { position: 'Bendahara 2', instagram: 'https://instagram.com/adaliciaallese' },
+
+  // Koordinator Seksi Bidang
   'Muhammad Fahrurrozi': { position: 'Koordinator Agama', instagram: 'https://instagram.com/ojiixmoriarty' },
-  'Muhammad Maulana': { position: 'Koordinator Medkom', instagram: 'https://instagram.com/pndiiyf' },
-  'Muhammad Rizky Faizal Ahkdan': { position: 'Koordinator Bela Negara', instagram: 'https://instagram.com/lanrush17' },
-  'Wa Ode Aprilia Izzati A.D': { position: 'Koordinator Olahraga', instagram: 'https://instagram.com/moyyrex' },
-  'Raysha Putri Syah': { position: 'Koordinator KWH', instagram: 'https://instagram.com/bbial0av' },
-  'Lones Liola': { position: 'Koordinator TIK', instagram: 'https://instagram.com/tskshima_kei' },
+  'Avinda Aulia Khafid': { position: 'Koordinator Media Komunikasi (Medkom)', instagram: 'https://instagram.com/pndiiyf_' },
+  'Muhammad Maulana': { position: 'Koordinator Bela Negara (Belneg)', instagram: 'https://instagram.com/lanrush17' },
+  'Kalila Najmil Al Humaira': { position: 'Koordinator Olahraga', instagram: 'https://instagram.com/moyyrex' },
+  'Febiangi Siti Nurhalisa': { position: 'Koordinator Kewirausahaan (KWH)', instagram: 'https://instagram.com/bbial0av' },
+  'Jenie Gunawan': { position: 'Koordinator Teknologi Informasi dan Komunikasi (TIK)', instagram: 'https://instagram.com/tskshima_kei' },
 }
 
 export interface Position {

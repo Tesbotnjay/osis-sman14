@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { MessageSquare, Send, CheckCircle, AlertTriangle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { MessageSquare, Send, CheckCircle, AlertTriangle, Lock } from 'lucide-react'
 import type { WspirasCategory } from '@/types/database'
 
 const categories: { value: WspirasCategory; label: string; description: string }[] = [
@@ -10,7 +10,7 @@ const categories: { value: WspirasCategory; label: string; description: string }
   { value: 'kritik', label: 'Kritik', description: 'Tanggapan terhadap hal yang perlu diperbaiki' },
 ]
 
-type FormState = 'idle' | 'loading' | 'success' | 'error'
+type FormState = 'idle' | 'loading' | 'success' | 'error' | 'disabled'
 
 export default function WspirasPage() {
   const [category, setCategory] = useState<WspirasCategory | null>(null)
@@ -19,6 +19,24 @@ export default function WspirasPage() {
   const [message, setMessage] = useState('')
   const [formState, setFormState] = useState<FormState>('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  const [isEnabled, setIsEnabled] = useState(true)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    checkFeatureStatus()
+  }, [])
+
+  const checkFeatureStatus = async () => {
+    try {
+      const res = await fetch('/api/w-spiras/status')
+      const data = await res.json()
+      setIsEnabled(data.enabled)
+    } catch {
+      setIsEnabled(true) // Default to enabled if check fails
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -81,24 +99,50 @@ export default function WspirasPage() {
   }
 
   if (formState === 'success') {
-    return (
-      <div className="min-h-screen bg-surface flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 rounded-full bg-green-100 mx-auto mb-4 flex items-center justify-center">
-            <CheckCircle size={32} className="text-green-600" />
+        return (
+          <div className="min-h-screen bg-surface flex items-center justify-center px-4">
+            <div className="text-center max-w-md">
+              <div className="w-16 h-16 rounded-full bg-green-100 mx-auto mb-4 flex items-center justify-center">
+                <CheckCircle size={32} className="text-green-600" />
+              </div>
+              <h2 className="font-heading text-xl font-bold text-primary mb-2">
+                Terima Kasih!
+              </h2>
+              <p className="text-primary/60">
+                Aspirasi kamu telah berhasil dikirim. Kami akan meninjau dan memproses pesan kamu.
+              </p>
+            </div>
           </div>
-          <h2 className="font-heading text-xl font-bold text-primary mb-2">
-            Terima Kasih!
-          </h2>
-          <p className="text-primary/60">
-            Aspirasi kamu telah berhasil dikirim. Kami akan meninjau dan memproses pesan kamu.
-          </p>
-        </div>
-      </div>
-    )
-  }
+        )
+      }
 
-  return (
+      if (loading) {
+        return (
+          <div className="min-h-screen bg-surface flex items-center justify-center px-4">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        )
+      }
+
+      if (!isEnabled) {
+        return (
+          <div className="min-h-screen bg-surface flex items-center justify-center px-4">
+            <div className="text-center max-w-md">
+              <div className="w-16 h-16 rounded-full bg-amber-100 mx-auto mb-4 flex items-center justify-center">
+                <Lock size={32} className="text-amber-600" />
+              </div>
+              <h2 className="font-heading text-xl font-bold text-primary mb-2">
+                Fitur Tidak Aktif
+              </h2>
+              <p className="text-primary/60">
+                W-SPIRAS sedang tidak tersedia saat ini. Silakan coba lagi nanti.
+              </p>
+            </div>
+          </div>
+        )
+      }
+
+      return (
     <div className="min-h-screen bg-surface">
       {/* Header */}
       <div className="bg-primary text-white py-16 px-4">

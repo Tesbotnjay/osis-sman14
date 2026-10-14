@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Modal } from '@/components/ui/modal';
 import { Spinner } from '@/components/ui/spinner';
 import { EmptyState } from '@/components/ui/empty-state';
-import { Download, FileText, FileSpreadsheet } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Download, FileText, FileSpreadsheet, Settings } from 'lucide-react';
 
 export default function WSpirasPage() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -15,6 +16,8 @@ export default function WSpirasPage() {
   const [loading, setLoading] = useState(true);
   const [selectedMsg, setSelectedMsg] = useState<any>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [wspirasEnabled, setWspirasEnabled] = useState(true);
+  const [toggleLoading, setToggleLoading] = useState(false);
   const supabase = createClient();
 
   const tabs = ['Semua', 'Baru', 'Dibaca', 'Diproses', 'Selesai', 'Spam'];
@@ -35,6 +38,7 @@ export default function WSpirasPage() {
 
   useEffect(() => {
     fetchMessages();
+    fetchFeatureStatus();
     
     const channel = supabase
       .channel('w-spiras-changes')
@@ -45,6 +49,29 @@ export default function WSpirasPage() {
       
     return () => { supabase.removeChannel(channel); };
   }, []);
+
+  const fetchFeatureStatus = async () => {
+    try {
+      const { data } = await supabase.from('site_settings').select('value').eq('key', 'w_spiras_enabled').single();
+      setWspirasEnabled(data?.value === true || data?.value === 'true');
+    } catch {
+      setWspirasEnabled(true);
+    }
+  };
+
+  const handleToggleFeature = async () => {
+    setToggleLoading(true);
+    try {
+      const newValue = !wspirasEnabled;
+      await supabase.from('site_settings').upsert({ key: 'w_spiras_enabled', value: newValue });
+      setWspirasEnabled(newValue);
+    } catch (error) {
+      console.error('Failed to toggle W-SPIRAS:', error);
+      alert('Gagal mengubah status W-SPIRAS');
+    } finally {
+      setToggleLoading(false);
+    }
+  };
 
   const fetchMessages = async () => {
     setLoading(true);
@@ -255,6 +282,29 @@ export default function WSpirasPage() {
           </Button>
         </div>
       </div>
+
+      {/* Feature Toggle Card */}
+      <Card className="p-4 border-secondary bg-white">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Settings size={20} className="text-primary/60" />
+            <div>
+              <h3 className="font-semibold text-primary">Status Fitur</h3>
+              <p className="text-sm text-primary/60">Aktifkan atau nonaktifkan fitur W-SPIRAS untuk pengunjung.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`text-sm font-medium ${wspirasEnabled ? 'text-green-600' : 'text-red-500'}`}>
+              {wspirasEnabled ? 'AKTIF' : 'NONAKTIF'}
+            </span>
+            <Switch
+              checked={wspirasEnabled}
+              onCheckedChange={handleToggleFeature}
+              disabled={toggleLoading}
+            />
+          </div>
+        </div>
+      </Card>
 
       <div className="flex gap-2 overflow-x-auto pb-2">
         {tabs.map(tab => (

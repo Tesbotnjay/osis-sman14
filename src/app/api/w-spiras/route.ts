@@ -23,6 +23,27 @@ setInterval(() => {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if W-SPIRAS is enabled via site_settings
+    const supabase = createAdminClient()
+    const { data: wspirasSetting, error } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'w_spiras_enabled')
+      .single()
+    
+    // Default to enabled if setting doesn't exist
+    let isEnabled = true
+    if (!error && wspirasSetting) {
+      isEnabled = wspirasSetting.value === true || wspirasSetting.value === 'true'
+    }
+    
+    if (!isEnabled) {
+      return NextResponse.json(
+        { error: 'Fitur W-SPIRAS sedang tidak aktif.' },
+        { status: 503 }
+      )
+    }
+
     // Get IP for rate limiting
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
       || request.headers.get('x-real-ip')
@@ -89,8 +110,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 7. Insert into database
-    const supabase = createAdminClient()
+    // 7. Insert into database (reuse supabase client already created)
 
     const isAnonymous = !sanitizedName
 

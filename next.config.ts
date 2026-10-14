@@ -31,7 +31,6 @@ const nextConfig: NextConfig = {
     localPatterns: [
       {
         pathname: '/api/protected-image/**',
-        search: '',
       },
     ],
     formats: ['image/avif', 'image/webp'],

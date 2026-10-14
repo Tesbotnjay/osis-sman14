@@ -16,11 +16,15 @@ export async function GET(req: NextRequest) {
   if (process.env.NODE_ENV === 'production' && referer) {
     try {
       const refererUrl = new URL(referer)
-      if (host && refererUrl.host !== host) {
+      const hostWithoutPort = host?.split(':')[0] || ''
+      const refererHostWithoutPort = refererUrl.hostname || ''
+      
+      // Allow same domain (ignore port differences in development)
+      if (hostWithoutPort && refererHostWithoutPort && !refererHostWithoutPort.includes(hostWithoutPort)) {
         return new NextResponse('Forbidden: Hotlinking is not allowed', { status: 403 })
       }
     } catch {
-      return new NextResponse('Forbidden: Invalid referer', { status: 403 })
+      // Invalid referer format, but don't block — just skip check
     }
   }
 

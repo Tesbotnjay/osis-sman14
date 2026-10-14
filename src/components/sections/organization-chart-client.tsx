@@ -2,7 +2,27 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { AdvisorPopup } from '@/components/shared/advisor-popup'
+import { CoordinatorPopup } from '@/components/shared/coordinator-popup'
+
+// Data coordinators from PRD 6.A-C
+const COORDINATOR_DATA: Record<string, { position: string; instagram: string }> = {
+  'List Hartiningsih': { position: 'Pembimbing', instagram: 'https://instagram.com/elhaningsih?obrf=NjliazhtdWU1c2h0' },
+  'Ahmad Saleh, S.Pd.': { position: 'Pembina', instagram: 'https://instagram.com/saleh.ahmad93' },
+  'Muhammad Rizky Andhika': { position: 'Ketua OSIS', instagram: 'https://instagram.com/rizandhi1' },
+  'Rizky': { position: 'Ketua OSIS', instagram: 'https://instagram.com/rizandhi1' },
+  'Naura Ken Nurul Izzah': { position: 'Wakil Ketua OSIS', instagram: 'https://instagram.com/kensheauie' },
+  'Ken': { position: 'Wakil Ketua OSIS', instagram: 'https://instagram.com/kensheauie' },
+  'Febi Fitria Anindah': { position: 'Sekretaris 1', instagram: 'https://instagram.com/fbiifitri' },
+  'Alfiora Bilqies Izzati Sharomah': { position: 'Sekretaris 2', instagram: 'https://instagram.com/fioeszzsh' },
+  'Tristan Elvis Pratama Putra': { position: 'Bendahara 1', instagram: 'https://instagram.com/elvtris' },
+  'Adalicia Allese Lisulembang': { position: 'Bendahara 2', instagram: 'https://instagram.com/adaliciaallese' },
+  'Muhammad Fahrurrozi': { position: 'Koordinator Agama', instagram: 'https://instagram.com/ojiixmoriarty' },
+  'Muhammad Maulana': { position: 'Koordinator Medkom', instagram: 'https://instagram.com/pndiiyf' },
+  'Muhammad Rizky Faizal Ahkdan': { position: 'Koordinator Bela Negara', instagram: 'https://instagram.com/lanrush17' },
+  'Wa Ode Aprilia Izzati A.D': { position: 'Koordinator Olahraga', instagram: 'https://instagram.com/moyyrex' },
+  'Raysha Putri Syah': { position: 'Koordinator KWH', instagram: 'https://instagram.com/bbial0av' },
+  'Lones Liola': { position: 'Koordinator TIK', instagram: 'https://instagram.com/tskshima_kei' },
+}
 
 export interface Position {
   id: string
@@ -24,30 +44,32 @@ interface OrgChartClientProps {
 export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
   const [popupState, setPopupState] = useState<{
     isOpen: boolean
-    type: 'pembimbing' | 'pembina'
-  }>({
-    isOpen: false,
-    type: 'pembimbing',
-  })
+    name: string
+    position: string
+    instagram: string
+  } | null>(null)
 
-  const handleNameClick = (type: 'pembimbing' | 'pembina') => {
-    setPopupState({
-      isOpen: true,
-      type,
-    })
+  const getCoordinatorData = (name: string | null | undefined) => {
+    if (!name) return null
+    return COORDINATOR_DATA[name] || null
   }
 
-  const isAdvisor = (node: Position): 'pembimbing' | 'pembina' | null => {
-    const title = node.title.toLowerCase()
+  const handleNameClick = (name: string | null | undefined) => {
+    if (!name) return
+    const data = getCoordinatorData(name)
+    if (data) {
+      setPopupState({
+        isOpen: true,
+        name,
+        position: data.position,
+        instagram: data.instagram,
+      })
+    }
+  }
+
+  const isAdvisor = (node: Position): boolean => {
     const name = node.member?.name?.toLowerCase() || ''
-    
-    if (title.includes('pembimbing') || name.includes('list hartiningsih')) {
-      return 'pembimbing'
-    }
-    if (title.includes('pembina') || name.includes('ahmad saleh')) {
-      return 'pembina'
-    }
-    return null
+    return Object.keys(COORDINATOR_DATA).some((k) => name.includes(k.toLowerCase()))
   }
 
   // ==========================================
@@ -66,8 +88,7 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
       sm: { photo: 'w-11 h-11 md:w-13 md:h-13', name: 'text-xs md:text-sm', title: 'text-[9px]', border: 'border-2' },
     }
     const s = sizeClasses[size]
-    const advisorType = isAdvisor(node)
-    const clickable = !!advisorType
+    const clickable = isAdvisor(node)
 
     const getProtectedImageUrl = (url: string | null) => {
       if (!url) return null
@@ -101,7 +122,7 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
               ? 'cursor-pointer hover:text-primary/70 transition-colors underline underline-offset-2 decoration-primary/30 hover:decoration-primary'
               : ''
           }`}
-          onClick={clickable ? () => handleNameClick(advisorType) : undefined}
+          onClick={clickable ? () => handleNameClick(node.member?.name) : undefined}
           role={clickable ? 'button' : undefined}
           tabIndex={clickable ? 0 : undefined}
           onKeyDown={
@@ -109,7 +130,7 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
               ? (e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    handleNameClick(advisorType)
+                    handleNameClick(node.member?.name)
                   }
                 }
               : undefined
@@ -249,8 +270,7 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
   const renderMobileNode = (node: Position, level: number = 0, isLast: boolean = false) => {
     const hasChildren = node.children && node.children.length > 0
     const indent = level * 1.5
-    const advisorType = isAdvisor(node)
-    const clickable = !!advisorType
+    const clickable = isAdvisor(node)
 
     return (
       <div key={`mob-${node.id}`} className="relative">
@@ -306,7 +326,7 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
               className={`font-heading font-bold text-primary leading-tight truncate ${
                 level === 0 ? 'text-sm' : 'text-xs'
               } ${clickable ? 'cursor-pointer hover:underline text-primary/80' : ''}`}
-              onClick={clickable ? () => handleNameClick(advisorType) : undefined}
+              onClick={clickable ? () => handleNameClick(node.member?.name) : undefined}
               role={clickable ? 'button' : undefined}
               tabIndex={clickable ? 0 : undefined}
               onKeyDown={
@@ -314,7 +334,7 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
                   ? (e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
-                        handleNameClick(advisorType)
+                        handleNameClick(node.member?.name)
                       }
                     }
                   : undefined
@@ -359,12 +379,16 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
         )}
       </div>
 
-      {/* Pop-up for Advisors */}
-      <AdvisorPopup
-        isOpen={popupState.isOpen}
-        onClose={() => setPopupState((prev) => ({ ...prev, isOpen: false }))}
-        type={popupState.type}
-      />
+      {/* Coordinator Popup */}
+      {popupState && (
+        <CoordinatorPopup
+          isOpen={popupState.isOpen}
+          onClose={() => setPopupState(null)}
+          name={popupState.name}
+          position={popupState.position}
+          instagram={popupState.instagram}
+        />
+      )}
     </>
   )
 }

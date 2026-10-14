@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, type MouseEvent } from 'react'
+import Image from 'next/image'
 import { AtSign, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -11,6 +12,7 @@ interface CoordinatorPopupProps {
   name: string
   position: string
   instagram: string
+  photo_url: string | null
 }
 
 export function CoordinatorPopup({
@@ -19,6 +21,7 @@ export function CoordinatorPopup({
   name,
   position,
   instagram,
+  photo_url,
 }: CoordinatorPopupProps) {
   // Close on escape key
   useEffect(() => {
@@ -101,10 +104,18 @@ export function CoordinatorPopup({
             {/* Content */}
             <div className="p-6">
               <div className="flex flex-col items-center text-center mb-6">
-                <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <div className="text-3xl text-primary/40 font-bold">
-                    {name.charAt(0)}
-                  </div>
+                <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-4 overflow-hidden relative border-4 border-white shadow-lg">
+                  {photo_url ? (
+                    <Image
+                      src={photo_url.includes('ibb.co') ? `/api/protected-image?url=${encodeURIComponent(photo_url)}` : photo_url}
+                      alt={name}
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  ) : (
+                    <div className="text-3xl text-primary/40 font-bold">{name.charAt(0)}</div>
+                  )}
                 </div>
                 <h3 className="text-2xl font-heading font-bold text-primary mb-1">
                   {name}

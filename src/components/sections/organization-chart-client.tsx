@@ -52,6 +52,7 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
     name: string
     position: string
     instagram: string
+    photo_url: string | null
   } | null>(null)
 
   const getCoordinatorData = (name: string | null | undefined) => {
@@ -59,7 +60,7 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
     return COORDINATOR_DATA[name] || null
   }
 
-  const handleNameClick = (name: string | null | undefined) => {
+  const handleNameClick = (name: string | null | undefined, photoUrl: string | null | undefined = null) => {
     if (!name) return
     const data = getCoordinatorData(name)
     if (data) {
@@ -68,6 +69,7 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
         name,
         position: data.position,
         instagram: data.instagram,
+        photo_url: photoUrl || null,
       })
     }
   }
@@ -127,7 +129,7 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
               ? 'cursor-pointer hover:text-primary/70 transition-colors underline underline-offset-2 decoration-primary/30 hover:decoration-primary'
               : ''
           }`}
-          onClick={clickable ? () => handleNameClick(node.member?.name) : undefined}
+          onClick={clickable ? () => handleNameClick(node.member?.name, node.member?.photo_url) : undefined}
           role={clickable ? 'button' : undefined}
           tabIndex={clickable ? 0 : undefined}
           onKeyDown={
@@ -331,7 +333,7 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
               className={`font-heading font-bold text-primary leading-tight truncate ${
                 level === 0 ? 'text-sm' : 'text-xs'
               } ${clickable ? 'cursor-pointer hover:underline text-primary/80' : ''}`}
-              onClick={clickable ? () => handleNameClick(node.member?.name) : undefined}
+              onClick={clickable ? () => handleNameClick(node.member?.name, node.member?.photo_url) : undefined}
               role={clickable ? 'button' : undefined}
               tabIndex={clickable ? 0 : undefined}
               onKeyDown={
@@ -392,6 +394,7 @@ export function OrgChartClient({ rootPositions }: OrgChartClientProps) {
           name={popupState.name}
           position={popupState.position}
           instagram={popupState.instagram}
+          photo_url={popupState.photo_url}
         />
       )}
     </>

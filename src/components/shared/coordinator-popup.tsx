@@ -112,17 +112,18 @@ export function CoordinatorPopup({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative z-modal w-full rounded-2xl bg-white shadow-2xl flex flex-col overflow-hidden"
+              className="relative z-modal w-full rounded-2xl bg-white shadow-2xl flex flex-col overflow-hidden isolate"
               style={{
                 maxWidth: 'clamp(280px, 100% - 2rem, 480px)',
                 maxHeight: 'clamp(200px, calc(100dvh - 2rem), calc(100vh - 2rem))',
+                backgroundColor: 'rgb(255, 255, 255)',
               }}
               role="dialog"
               aria-modal="true"
               aria-labelledby="coordinator-popup-title"
             >
               {/* Header */}
-              <div className="shrink-0 flex items-center justify-between border-b border-secondary/30 px-4 sm:px-6 py-3 sm:py-4"
+              <div className="shrink-0 flex items-center justify-between border-b border-secondary/30 px-4 sm:px-6 py-3 sm:py-4 bg-white"
                 style={{
                   paddingTop: 'max(0.75rem, calc(0.75rem + env(safe-area-inset-top)))',
                   paddingLeft: 'max(1rem, calc(1rem + env(safe-area-inset-left)))',

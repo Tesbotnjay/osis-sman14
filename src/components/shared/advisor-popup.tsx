@@ -77,7 +77,8 @@ export function AdvisorPopup({ isOpen, onClose, type }: AdvisorPopupProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative z-modal w-full max-w-md rounded-2xl bg-white shadow-xl"
+            className="relative z-modal w-full max-w-md rounded-2xl bg-white shadow-xl isolate"
+            style={{ backgroundColor: 'rgb(255, 255, 255)' }}
             role="dialog"
             aria-modal="true"
             aria-labelledby="advisor-popup-title"

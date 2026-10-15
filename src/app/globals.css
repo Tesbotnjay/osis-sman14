@@ -71,8 +71,8 @@
   --z-dropdown: 100;
   --z-sticky: 200;
   --z-fixed: 300;
-  --z-modal-backdrop: 400;
-  --z-modal: 500;
+  --z-modal-backdrop: 9000;
+  --z-modal: 9100;
   --z-toast: 600;
   
   /* Breakpoints for reference */

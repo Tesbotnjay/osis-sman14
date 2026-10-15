@@ -103,7 +103,7 @@ export function AdvisorPopup({ isOpen, onClose, type }: AdvisorPopupProps) {
             </div>
 
             {/* Content */}
-            <div className="p-6">
+            <div className="p-6 bg-white">
               <div className="flex flex-col items-center text-center mb-6">
                 <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <div className="text-3xl text-primary/40 font-bold">

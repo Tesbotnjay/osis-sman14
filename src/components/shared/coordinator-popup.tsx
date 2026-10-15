@@ -152,7 +152,7 @@ export function CoordinatorPopup({
               </div>
 
               {/* Content - Scrollable */}
-              <div className="overflow-y-auto overscroll-contain px-4 sm:px-6 py-4 sm:py-6 flex-1"
+              <div className="overflow-y-auto overscroll-contain px-4 sm:px-6 py-4 sm:py-6 flex-1 bg-white"
                 style={{
                   paddingLeft: 'max(1rem, calc(1rem + env(safe-area-inset-left)))',
                   paddingRight: 'max(1rem, calc(1rem + env(safe-area-inset-right)))',
